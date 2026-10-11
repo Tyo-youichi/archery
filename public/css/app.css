@@ -26,6 +26,11 @@
 
 * { -webkit-font-smoothing: antialiased; }
 
+/* Basis 15px: semua ukuran berbasis rem (judul, tabel, tombol, spacing) ikut
+   proporsional. Plus Jakarta Sans ber-x-height besar, jadi 15px lebih pas untuk
+   tampilan padat data dibanding 16px default. */
+html { font-size: 15px; }
+
 body {
     font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     background: var(--bg);
