@@ -99,7 +99,46 @@
             @endforeach
         </div>
         <p class="text-muted small text-center mt-3 mb-0">Rata-rata skor: {{ $A['athlete']->name }} {{ $A['avg'] ?? '-' }} · {{ $B['athlete']->name }} {{ $B['avg'] ?? '-' }} (dari {{ $A['count'] }} dan {{ $B['count'] }} catatan)</p>
+
+        {{-- Grafik perbandingan (radar profil per grup) --}}
+        <div class="vs-band">Grafik Perbandingan</div>
+        <div class="mx-auto" style="max-width:540px"><canvas id="h2hRadar" height="260"></canvas></div>
     </div></div>
+
+    @php
+        $radarLabels = []; $radarA = []; $radarB = [];
+        foreach (['physical', 'technique'] as $dim) {
+            foreach (($A['profile'][$dim]['groups'] ?: $B['profile'][$dim]['groups']) as $g => $row) {
+                $radarLabels[] = $row['label'];
+                $va = $A['profile'][$dim]['groups'][$g]['pct'] ?? null;
+                $vb = $B['profile'][$dim]['groups'][$g]['pct'] ?? null;
+                $radarA[] = $va === null ? 0 : round($va * 100, 1);
+                $radarB[] = $vb === null ? 0 : round($vb * 100, 1);
+            }
+        }
+    @endphp
+    @push('scripts')
+    <script>
+    (function () {
+        const el = document.getElementById('h2hRadar');
+        if (!el) return;
+        new Chart(el, {
+            type: 'radar',
+            data: {
+                labels: @json($radarLabels),
+                datasets: [
+                    { label: @json($A['athlete']->name), data: @json($radarA), borderColor: '#0e6e78', backgroundColor: 'rgba(14,110,120,.18)', pointBackgroundColor: '#0e6e78' },
+                    { label: @json($B['athlete']->name), data: @json($radarB), borderColor: '#5a4b9a', backgroundColor: 'rgba(90,75,154,.18)', pointBackgroundColor: '#5a4b9a' }
+                ]
+            },
+            options: {
+                scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } },
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    })();
+    </script>
+    @endpush
     @endif
 
 </div>
