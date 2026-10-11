@@ -12,9 +12,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call(YoyoReferenceSeeder::class);
-        $this->call(DemoSeeder::class);
-        $this->call(RoleUserSeeder::class);
+        // RBAC (roles, route_permissions, menus) + akun 3 role + referensi Yo-Yo.
+        $this->call([
+            RbacSeeder::class,
+            RoleUserSeeder::class,
+            YoyoReferenceSeeder::class,
+        ]);
 
         // \App\Models\User::factory()->create([
         //     'name' => 'Test User',

@@ -26,7 +26,7 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([RoleUserSeeder::class, YoyoReferenceSeeder::class]);
+        $this->call([RbacSeeder::class, RoleUserSeeder::class, YoyoReferenceSeeder::class]);
 
         $year = now()->year;
         $testDate = Carbon::create($year, 1, 15)->toDateString();

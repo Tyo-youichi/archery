@@ -50,8 +50,19 @@ class User extends Authenticatable
         return $this->hasOne(Athlete::class);
     }
 
+    /** Staf = role yang terdaftar di config/rbac.php (admin, coach). */
     public function isStaff(): bool
     {
-        return in_array($this->role, ['admin', 'coach'], true);
+        return \App\Support\Rbac::isStaff($this->role);
+    }
+
+    public function hasRole(string ...$roles): bool
+    {
+        return in_array($this->role, $roles, true);
+    }
+
+    public function roleLabel(): string
+    {
+        return \App\Support\Rbac::label($this->role);
     }
 }

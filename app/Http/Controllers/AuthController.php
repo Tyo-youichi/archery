@@ -52,7 +52,7 @@ class AuthController extends Controller
                 'email' => $data['email'],
                 'phone' => $data['phone'] ?? null,
                 'password' => Hash::make($data['password']),
-                'role' => 'athlete',
+                'role' => config('rbac.default_role', 'athlete'),
             ]);
             Athlete::create([
                 'user_id' => $user->id,

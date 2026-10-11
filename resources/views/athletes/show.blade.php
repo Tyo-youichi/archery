@@ -20,7 +20,9 @@
         <a class="btn btn-success btn-sm" href="{{ route('shoot-log.edit', $athlete) }}">📒 Buku Saku (100 arrow)</a>
         @if($staff)
             <a class="btn btn-outline-secondary btn-sm" href="{{ route('athletes.edit', $athlete) }}">Edit biodata</a>
-            <form method="post" action="{{ route('athletes.destroy', $athlete) }}" onsubmit="return confirm('Hapus atlet beserta seluruh datanya?')">@csrf @method('DELETE')<button class="btn btn-outline-danger btn-sm">Hapus</button></form>
+            @if(auth()->user()->hasRole('admin'))
+                <form method="post" action="{{ route('athletes.destroy', $athlete) }}" onsubmit="return confirm('Hapus atlet beserta seluruh datanya?')">@csrf @method('DELETE')<button class="btn btn-outline-danger btn-sm">Hapus</button></form>
+            @endif
         @endif
     </div>
 </div>

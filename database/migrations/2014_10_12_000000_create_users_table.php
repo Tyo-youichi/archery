@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'coach', 'athlete'])->default('athlete');
+            // Kode role, merujuk ke tabel `roles` (bukan enum, agar role bisa ditambah dari DB).
+            $table->string('role', 30)->default('athlete')->index();
             $table->string('phone', 30)->nullable();
             $table->rememberToken();
             $table->timestamps();

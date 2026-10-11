@@ -20,16 +20,12 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a></li>
-                @if(auth()->user()->isStaff())
-                    <li class="nav-item"><a class="nav-link" href="{{ route('athletes.index') }}">Atlet</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('h2h') }}">Head to Head</a></li>
-                @elseif(auth()->user()->athlete)
-                    <li class="nav-item"><a class="nav-link" href="{{ route('athletes.show', auth()->user()->athlete) }}">Profil saya</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('shoot-log.edit', auth()->user()->athlete) }}">Buku Saku</a></li>
-                @endif
+                {{-- Menu mengikuti RBAC: hanya item yang diizinkan role user (config/rbac.php). --}}
+                @foreach(\App\Support\Rbac::menu(auth()->user()) as $item)
+                    <li class="nav-item"><a @class(['nav-link', 'active' => request()->routeIs($item['route'])]) href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
+                @endforeach
             </ul>
-            <span class="navbar-text me-3">{{ auth()->user()->name }} <span class="badge text-bg-secondary">{{ auth()->user()->role }}</span></span>
+            <span class="navbar-text me-3">{{ auth()->user()->name }} <span class="badge text-bg-secondary">{{ auth()->user()->roleLabel() }}</span></span>
             <form method="post" action="{{ route('logout') }}">@csrf <button class="btn btn-outline-light btn-sm">Keluar</button></form>
         </div>
         @endauth
