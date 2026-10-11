@@ -1,85 +1,106 @@
 @extends('layouts.app')
 @section('title', 'Head to Head')
 @php
-    $fmt = fn ($v, $d = 1) => $v === null ? '-' : rtrim(rtrim(number_format((float) $v, $d, ',', '.'), '0'), ',');
-    $pc = fn ($v) => $v === null ? '-' : round($v * 100, 1) . '%';
+    $pc = fn ($v) => $v === null ? '-' : round($v * 100) . '%';
+    $num = fn ($v, $d = 0) => $v === null ? '-' : rtrim(rtrim(number_format((float) $v, $d, ',', '.'), '0'), ',');
 @endphp
 @section('content')
-<h1 class="h4 mb-3">Dashboard Head to Head</h1>
-<form class="row g-2 mb-4" method="get">
-    @foreach(['a' => $a, 'b' => $b] as $k => $sel)
-        <div class="col-md-4"><select name="{{ $k }}" class="form-select" required><option value="">Pilih atlet {{ strtoupper($k) }}</option>
-            @foreach($athletes as $x)<option value="{{ $x->id }}" @selected($sel && $sel->id == $x->id)>{{ $x->code }} · {{ $x->name }}</option>@endforeach</select></div>
-    @endforeach
-    <div class="col-md-2"><button class="btn btn-primary w-100">Bandingkan</button></div>
-</form>
+<div class="h2h">
 
-@if($cmp)
-@php [$A, $B] = $cmp; @endphp
-<div class="row g-3 mb-3">
-    <div class="col-lg-6"><div class="card h-100"><div class="card-body"><canvas id="radar"></canvas></div></div></div>
-    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
-        <table class="table table-compact mb-0">
-            <thead><tr><th></th><th>{{ $A['athlete']->name }}</th><th>{{ $B['athlete']->name }}</th></tr></thead>
-            <tbody>
-                <tr><th>Usia</th><td>{{ $A['athlete']->age ?? '-' }}</td><td>{{ $B['athlete']->age ?? '-' }}</td></tr>
-                <tr><th>Divisi</th><td>{{ $A['athlete']->division ?? '-' }}</td><td>{{ $B['athlete']->division ?? '-' }}</td></tr>
-                <tr><th>Profil fisik</th><td>{{ $pc($A['profile']['physical']['overall']) }}</td><td>{{ $pc($B['profile']['physical']['overall']) }}</td></tr>
-                <tr><th>Profil teknik</th><td>{{ $pc($A['profile']['technique']['overall']) }}</td><td>{{ $pc($B['profile']['technique']['overall']) }}</td></tr>
-                <tr><th>Skor terbaik</th><td>{{ $A['best'] ?? '-' }}</td><td>{{ $B['best'] ?? '-' }}</td></tr>
-                <tr><th>Rata-rata skor</th><td>{{ $A['avg'] ?? '-' }}</td><td>{{ $B['avg'] ?? '-' }}</td></tr>
-                <tr><th>Jumlah catatan skor</th><td>{{ $A['count'] }}</td><td>{{ $B['count'] }}</td></tr>
-            </tbody>
-        </table>
-    </div></div></div>
-</div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 no-print">
+        <h1 class="page-title mb-0">Head to Head</h1>
+        @if($cmp)
+            <button type="button" class="btn btn-success btn-sm" onclick="window.print()">Cetak / Simpan PDF</button>
+        @endif
+    </div>
 
-<div class="row g-3">
-    @foreach(['anthropometry' => 'Antropometri'] as $_ => $title)
-    <div class="col-lg-6"><div class="card"><div class="card-body">
-        <h2 class="h6">{{ $title }} (pengukuran terakhir)</h2>
-        <table class="table table-compact mb-0"><tbody>
-            @foreach(['height_cm' => 'Tinggi badan (cm)', 'weight_kg' => 'Berat badan (kg)', 'arm_span_cm' => 'Rentang lengan (cm)', 'shoulder_width_cm' => 'Lebar bahu (cm)', 'bmi' => 'IMT'] as $f => $l)
-                <tr><th>{{ $l }}</th><td>{{ $fmt($A['profile']['anthropometry']?->{$f}, 2) }}</td><td>{{ $fmt($B['profile']['anthropometry']?->{$f}, 2) }}</td></tr>
+    <form class="row g-2 vs-selectbar mb-4 no-print" method="get">
+        @foreach(['a' => $a, 'b' => $b] as $key => $sel)
+            <div class="col-md-5"><select name="{{ $key }}" class="form-select" required>
+                <option value="">Pilih atlet {{ strtoupper($key) }}</option>
+                @foreach($athletes as $x)<option value="{{ $x->id }}" @selected($sel && $sel->id == $x->id)>{{ $x->code }} · {{ $x->name }}</option>@endforeach
+            </select></div>
+        @endforeach
+        <div class="col-md-2"><button class="btn btn-primary w-100">Bandingkan</button></div>
+    </form>
+
+    @if($cmp)
+    @php [$A, $B] = $cmp; $anL = $A['profile']['anthropometry']; $anR = $B['profile']['anthropometry']; @endphp
+
+    {{-- VS banner --}}
+    <div class="card"><div class="card-body">
+        <div class="vs-names">
+            <div class="vs-name vs-name--left">{{ $A['athlete']->name }}</div>
+            <div class="vs-badge">VS</div>
+            <div class="vs-name vs-name--right">{{ $B['athlete']->name }}</div>
+        </div>
+        <div class="vs-meta">
+            <div><span class="div">{{ $A['athlete']->age ? $A['athlete']->age.' Th' : '' }}</span> · {{ $A['athlete']->division ?? '-' }}</div>
+            <div class="right"><span class="div">{{ $B['athlete']->age ? $B['athlete']->age.' Th' : '' }}</span> · {{ $B['athlete']->division ?? '-' }}</div>
+        </div>
+
+        {{-- Antropometri --}}
+        <div class="vs-band">Antropometri &amp; Komposisi Tubuh</div>
+        @php
+            $photo = function ($ath) {
+                if ($ath->photo_url) {
+                    return '<img src="'.e($ath->photo_url).'" class="vs-photo" alt="'.e($ath->name).'">';
+                }
+                return '<div class="vs-photo vs-photo--ph"><svg width="56" height="56" viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/></svg></div>';
+            };
+            $anthroDefs = [
+                ['Tinggi Badan (m)',   fn ($x) => $x && $x->height_cm ? number_format($x->height_cm / 100, 2, ',', '.') : '-'],
+                ['Berat Badan (kg)',   fn ($x) => $x ? $num($x->weight_kg, 1) : '-'],
+                ['Body Mass Index',    fn ($x) => $x ? $num($x->bmi, 1) : '-'],
+                ['Kategori BMI',       fn ($x) => $x->bmi_category ?? '-'],
+                ['Tinggi Duduk (cm)',  fn ($x) => $x ? $num($x->sitting_height_cm, 1) : '-'],
+                ['Panjang Tungkai (cm)', fn ($x) => $x ? $num($x->leg_length_cm, 1) : '-'],
+                ['Panjang Lengan (cm)', fn ($x) => $x ? $num($x->arm_length_cm, 1) : '-'],
+                ['Rentang Lengan (cm)', fn ($x) => $x ? $num($x->arm_span_cm, 1) : '-'],
+                ['Lebar Bahu (cm)',    fn ($x) => $x ? $num($x->shoulder_width_cm, 1) : '-'],
+            ];
+        @endphp
+        <div class="vs-anthro">
+            <div class="text-center">{!! $photo($A['athlete']) !!}</div>
+            <div class="vs-rows">
+                @foreach($anthroDefs as [$label, $f])
+                    <div class="vs-row"><div class="l">{{ $f($anL) }}</div><div class="m">{{ $label }}</div><div class="r">{{ $f($anR) }}</div></div>
+                @endforeach
+            </div>
+            <div class="text-center">{!! $photo($B['athlete']) !!}</div>
+        </div>
+
+        {{-- Physical & Skill performance --}}
+        @foreach([['physical', 'Physical Performance'], ['technique', 'Skill Performance']] as [$dim, $title])
+            <div class="vs-band">{{ $title }}</div>
+            <div class="vs-perf">
+                <div class="vs-big vs-big--left">{{ $pc($A['profile'][$dim]['overall']) }}</div>
+                <div class="vs-rows">
+                    @foreach(($A['profile'][$dim]['groups'] ?: $B['profile'][$dim]['groups']) as $g => $row)
+                        <div class="vs-row">
+                            <div class="l">{{ $pc($A['profile'][$dim]['groups'][$g]['pct'] ?? null) }}</div>
+                            <div class="m">{{ $row['label'] }}</div>
+                            <div class="r">{{ $pc($B['profile'][$dim]['groups'][$g]['pct'] ?? null) }}</div>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="vs-big vs-big--right">{{ $pc($B['profile'][$dim]['overall']) }}</div>
+            </div>
+        @endforeach
+
+        {{-- Score recap --}}
+        <div class="vs-band">Score Recap</div>
+        <div class="vs-scores">
+            @foreach([$A, $B] as $S)
+                <div class="score-pair">
+                    <div class="score-box score-box--best"><div class="score-box__label">SKOR TERTINGGI</div><div class="score-box__value">{{ $S['best'] ?? '-' }}</div></div>
+                    <div class="score-box score-box--low"><div class="score-box__label">SKOR TERENDAH</div><div class="score-box__value">{{ $S['low'] ?? '-' }}</div></div>
+                </div>
             @endforeach
-        </tbody></table>
-    </div></div></div>
-    @endforeach
-    @foreach(['physical' => 'Performa Fisik', 'technique' => 'Performa Teknik (Skill)'] as $t => $title)
-    <div class="col-lg-6"><div class="card"><div class="card-body">
-        <h2 class="h6">{{ $title }} (% capaian)</h2>
-        <table class="table table-compact mb-0"><tbody>
-            @foreach($A['profile'][$t]['metrics'] ?: $B['profile'][$t]['metrics'] as $key => $m)
-                <tr><th>{{ $m['label'] }}</th><td>{{ $pc($A['profile'][$t]['metrics'][$key]['pct'] ?? null) }}</td><td>{{ $pc($B['profile'][$t]['metrics'][$key]['pct'] ?? null) }}</td></tr>
-            @endforeach
-        </tbody></table>
-    </div></div></div>
-    @endforeach
-</div>
-@endif
+        </div>
+        <p class="text-muted small text-center mt-3 mb-0">Rata-rata skor: {{ $A['athlete']->name }} {{ $A['avg'] ?? '-' }} · {{ $B['athlete']->name }} {{ $B['avg'] ?? '-' }} (dari {{ $A['count'] }} dan {{ $B['count'] }} catatan)</p>
+    </div></div>
+    @endif
 
-@if($cmp)
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-@php
-    $labels = []; $series = [[], []];
-    foreach (['physical', 'technique'] as $t) {
-        foreach ($cmp[0]['profile'][$t]['groups'] ?: $cmp[1]['profile'][$t]['groups'] as $g => $row) {
-            $labels[] = $row['label'];
-            foreach ([0, 1] as $i) { $v = $cmp[$i]['profile'][$t]['groups'][$g]['pct'] ?? null; $series[$i][] = $v === null ? 0 : round($v * 100, 1); }
-        }
-    }
-@endphp
-new Chart(document.getElementById('radar'), {
-    type: 'radar',
-    data: { labels: @json($labels), datasets: [
-        { label: @json($cmp[0]['athlete']->name), data: @json($series[0]), fill: true },
-        { label: @json($cmp[1]['athlete']->name), data: @json($series[1]), fill: true }
-    ]},
-    options: { scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } } }
-});
-</script>
-@endpush
-@endif
+</div>
 @endsection

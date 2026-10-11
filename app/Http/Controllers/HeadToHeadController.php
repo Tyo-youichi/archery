@@ -24,9 +24,10 @@ class HeadToHeadController extends Controller
                 $p = ProfileService::forAthlete($ath);
                 $s = MonthlyScore::where('athlete_id', $ath->id)->whereNotNull('score');
                 $cmp[$k] = [
-                    'athlete' => $ath,
+                    'athlete' => $ath->load('anthropometries'),
                     'profile' => $p,
                     'best' => (clone $s)->max('score'),
+                    'low' => (clone $s)->min('score'),
                     'avg' => ($avg = (clone $s)->avg('score')) ? round($avg, 1) : null,
                     'count' => (clone $s)->count(),
                 ];
