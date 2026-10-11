@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) ?: '1' }}" rel="stylesheet">
     @stack('head')
 </head>
 <body>
@@ -47,8 +47,8 @@
     @endif
     @yield('content')
 </main>
-<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ asset('js/chart.umd.min.js') }}"></script>
+<script src="{{ asset('js/bootstrap.bundle.min.js') }}?v={{ @filemtime(public_path('js/bootstrap.bundle.min.js')) ?: '1' }}"></script>
+<script src="{{ asset('js/chart.umd.min.js') }}?v={{ @filemtime(public_path('js/chart.umd.min.js')) ?: '1' }}"></script>
 @stack('scripts')
 </body>
 </html>
