@@ -31,9 +31,9 @@ class ShootLogController extends Controller
 
         $days = [];
         $i = 0;
-        foreach (config('archery.shoot_days') as $code => $name) {
+        foreach (config('archery.shoot_days') as $name) {
             $d = $start->copy()->addDays($i++);
-            $days[] = ['code' => $code, 'name' => $name, 'date' => $d, 'log' => $logs->get($d->toDateString())];
+            $days[] = ['name' => $name, 'date' => $d, 'log' => $logs->get($d->toDateString())];
         }
 
         // Rekap 8 minggu terakhir: jumlah hari shoot 100 arrow

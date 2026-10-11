@@ -25,7 +25,7 @@
         @foreach($days as $d)
             @php $key = $d['date']->toDateString(); $log = $d['log']; $sel = old("logs.$key.techniques", $log?->techniques ?? []); @endphp
             <tr>
-                <th class="text-start">{{ $d['code'] }}<div class="small fw-normal text-muted">{{ $d['date']->format('d/m') }}</div></th>
+                <th class="text-start">{{ $d['name'] }}<div class="small fw-normal text-muted">{{ $d['date']->format('d/m') }}</div></th>
                 @foreach(config('archery.technique_codes') as $c => $n)
                     <td><input class="form-check-input" type="checkbox" name="logs[{{ $key }}][techniques][]" value="{{ $c }}" @checked(in_array($c, $sel))></td>
                 @endforeach
