@@ -279,6 +279,16 @@ main.container { max-width: 1100px; }
     body { background: #fff; }
     .card { box-shadow: none; border-color: #ccc; }
     main.container { max-width: 100%; }
+
+    /* Pertahankan layout versus 3 kolom (foto | data | foto) saat cetak PDF,
+       menimpa breakpoint tumpuk di atas (lebar kertas bisa memicunya). */
+    .vs-anthro { grid-template-columns: 120px 1fr 120px !important; justify-items: stretch !important; align-items: center; }
+    .vs-perf   { grid-template-columns: 1fr 1.7fr 1fr !important; }
+    .vs-scores { grid-template-columns: 1fr 1fr !important; }
+    .vs-photo  { width: 110px !important; height: 110px !important; }
+    .vs-row .m { min-width: 0 !important; }
+    /* Hindari foto/kartu terpotong antar-halaman */
+    .vs-anthro, .vs-perf, .vs-photo, .card { break-inside: avoid; }
 }
 
 /* ---------- Donut gauge (data visual) -------------------------------- */
