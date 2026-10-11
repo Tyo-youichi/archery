@@ -26,15 +26,27 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([RbacSeeder::class, RoleUserSeeder::class, YoyoReferenceSeeder::class]);
+        $this->call([RbacSeeder::class, RoleUserSeeder::class, YoyoReferenceSeeder::class, MetricSeeder::class]);
 
         $year = now()->year;
         $testDate = Carbon::create($year, 1, 15)->toDateString();
         $monday = now()->startOfWeek();
 
         // metrik fisik & teknik (urutan sama dengan kolom pada array 'ph' dan 'te')
-        $physKeys = array_keys(config('archery.physical_metrics'));   // yoyo_vo2, stork_right, ...
-        $techKeys = array_keys(config('archery.technique_metrics'));  // qualification, ...
+        $physCfg = config('archery.physical_metrics');
+        $techCfg = config('archery.technique_metrics');
+        $physKeys = array_keys($physCfg);   // yoyo_vo2, stork_right, ...
+        $techKeys = array_keys($techCfg);   // qualification, ...
+
+        // BM default per gender dari config (untuk snapshot pada data dummy).
+        $bmFor = function (array $cfg, string $key, ?string $gender) {
+            $bm = $cfg[$key]['bm'] ?? null;
+            if (is_array($bm)) {
+                return (float) ($bm[$gender] ?? reset($bm));
+            }
+
+            return $bm === null ? null : (float) $bm;
+        };
 
         foreach ($this->athletes() as $d) {
             $athlete = Athlete::updateOrCreate(['code' => $d['code']], [
@@ -60,19 +72,26 @@ class DemoSeeder extends Seeder
             ]);
 
             // Tes fisik: ph = [yoyo_level, yoyo_vo2, stork_r, stork_l, grip_r, grip_l, bench, core]
+            // Hasil disimpan ke JSON results: { key => { result, bm(snapshot) } }.
             $ph = $d['ph'];
-            $physVals = ['yoyo_level' => $ph[0]];
+            $physResults = [];
             foreach ($physKeys as $i => $key) {
-                $physVals[$key] = $ph[$i + 1];   // BM dibiarkan null => pakai default per gender
+                $physResults[$key] = ['result' => (float) $ph[$i + 1], 'bm' => $bmFor($physCfg, $key, $d['gender'])];
             }
-            PhysicalTest::updateOrCreate(['athlete_id' => $athlete->id, 'tested_at' => $testDate], $physVals);
+            PhysicalTest::updateOrCreate(
+                ['athlete_id' => $athlete->id, 'tested_at' => $testDate],
+                ['yoyo_level' => $ph[0], 'results' => $physResults]
+            );
 
             // Performa teknik: te sejajar dengan $techKeys
-            $techVals = [];
+            $techResults = [];
             foreach ($techKeys as $i => $key) {
-                $techVals[$key] = $d['te'][$i];  // BM default dari config
+                $techResults[$key] = ['result' => (float) $d['te'][$i], 'bm' => $bmFor($techCfg, $key, $d['gender'])];
             }
-            TechniqueTest::updateOrCreate(['athlete_id' => $athlete->id, 'tested_at' => $testDate], $techVals);
+            TechniqueTest::updateOrCreate(
+                ['athlete_id' => $athlete->id, 'tested_at' => $testDate],
+                ['results' => $techResults]
+            );
 
             foreach ($d['sc'] as [$month, $score]) {
                 MonthlyScore::updateOrCreate(

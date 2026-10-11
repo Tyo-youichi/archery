@@ -28,16 +28,10 @@ $technique = [
 $num = fn ($label, $step = '0.01', $rules = 'nullable|numeric|min:0') =>
     ['label' => $label, 'type' => 'number', 'step' => $step, 'rules' => $rules];
 
-$metricFields = function (array $metrics) use ($num) {
-    $fields = [];
-    foreach ($metrics as $key => $m) {
-        $fields[$key] = $num($m['label']);
-        $fields[$key . '_bm'] = $num('BM ' . $m['label'] . ' (kosongkan = default)');
-    }
-    return $fields;
-};
-
 return [
+
+    // Cache snapshot definisi metrik dari DB (App\Support\Metrics). Set false saat debugging.
+    'metrics_cache' => true,
     'divisions' => ['Recurve', 'Compound', 'Barebow', 'Nasional'],
     'registration_types' => [
         'reguler'  => 'Reguler',
@@ -106,18 +100,18 @@ return [
             'model' => \App\Models\PhysicalTest::class,
             'label' => 'Tes Performa Fisik',
             'date'  => 'tested_at',
+            // Field metrik (nilai + BM) disisipkan dinamis oleh RecordController dari tabel `metrics`.
             'fields' => ['tested_at' => ['label' => 'Tanggal tes', 'type' => 'date', 'rules' => 'required|date'],
                          'venue' => ['label' => 'Tempat tes', 'type' => 'text', 'rules' => 'nullable|string|max:150'],
-                         'yoyo_level' => $num('Yo-Yo IR1 level (mis. 14.5; VO2max terisi otomatis dari tabel referensi bila kosong)', '0.1')]
-                       + $metricFields($physical),
+                         'yoyo_level' => $num('Yo-Yo IR1 level (mis. 14.5; VO2max terisi otomatis dari tabel referensi bila kosong)', '0.1')],
         ],
         'technique' => [
             'model' => \App\Models\TechniqueTest::class,
             'label' => 'Performa Teknik',
             'date'  => 'tested_at',
+            // Field metrik (nilai + BM) disisipkan dinamis oleh RecordController dari tabel `metrics`.
             'fields' => ['tested_at' => ['label' => 'Tanggal tes', 'type' => 'date', 'rules' => 'required|date'],
-                         'venue' => ['label' => 'Tempat tes', 'type' => 'text', 'rules' => 'nullable|string|max:150']]
-                       + $metricFields($technique),
+                         'venue' => ['label' => 'Tempat tes', 'type' => 'text', 'rules' => 'nullable|string|max:150']],
         ],
         'load' => [
             'model' => \App\Models\LoadTest::class,

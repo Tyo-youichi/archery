@@ -7,9 +7,10 @@
     <form method="post" class="row g-3"
           action="{{ $record ? route('records.update', [$athlete, $type, $record->id]) : route('records.store', [$athlete, $type]) }}">
         @csrf @if($record) @method('PUT') @endif
+        @php $values = $values ?? []; @endphp
         @foreach($def['fields'] as $name => $f)
             @php
-                $val = old($name, $record?->{$name} ?? ($name === $def['date'] ? now()->format('Y-m-d') : ($name === 'year' ? now()->year : null)));
+                $val = old($name, ($values[$name] ?? null) ?? $record?->{$name} ?? ($name === $def['date'] ? now()->format('Y-m-d') : ($name === 'year' ? now()->year : null)));
                 if ($val instanceof \Carbon\CarbonInterface) { $val = $val->format('Y-m-d'); }
             @endphp
             <div class="{{ ($f['type'] ?? '') === 'textarea' ? 'col-12' : 'col-md-4' }}">

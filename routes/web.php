@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\HeadToHeadController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\MetricController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoutePermissionController;
@@ -56,6 +57,11 @@ Route::middleware(['auth', 'rbac'])->group(function () {
     });
 
     Route::get('/head-to-head', [HeadToHeadController::class, 'index'])->name('h2h');
+
+    // Pengelolaan metrik & benchmark (CRUD). Khusus admin (hard guard + izin RBAC 'metrics.*').
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('metrics', MetricController::class)->except(['show']);
+    });
 
     /*
      * Pengelolaan RBAC (CRUD roles, izin route, menu). Khusus admin.

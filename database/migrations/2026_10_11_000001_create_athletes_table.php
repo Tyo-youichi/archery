@@ -48,33 +48,40 @@ return new class extends Migration
             $table->decimal('vo2max', 5, 2);
         });
 
-        $metrics = config('archery');
-
-        Schema::create('physical_tests', function (Blueprint $table) use ($metrics) {
+        /*
+         * Hasil tes fisik & teknik disimpan sebagai JSON `results` (sumber data mentah):
+         *   { "<metric_key>": { "result": <nilai>, "bm": <benchmark snapshot> }, ... }
+         * Dengan begini metrik bisa ditambah/dihapus lewat UI (tabel `metrics`) tanpa
+         * mengubah skema. Untuk key "panas" yang perlu analitik lintas-atlet (rata-rata,
+         * ranking) ditambahkan kolom GENERATED yang di-index — diturunkan otomatis dari
+         * JSON sehingga tidak pernah drift & tanpa dobel-tulis. Tambah kolom semacam ini
+         * lewat migration baru saat sebuah metrik ditandai "promoted".
+         */
+        Schema::create('physical_tests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('athlete_id')->constrained()->cascadeOnDelete();
             $table->date('tested_at');
             $table->string('venue', 150)->nullable();
             $table->decimal('yoyo_level', 4, 1)->nullable();
-            foreach (array_keys($metrics['physical_metrics']) as $key) {
-                $table->decimal($key, 8, 2)->nullable();
-                $table->decimal($key . '_bm', 8, 2)->nullable();
-            }
+            $table->json('results')->nullable();
+            $table->decimal('yoyo_vo2_val', 8, 2)
+                ->virtualAs("CAST(JSON_VALUE(`results`, '\$.yoyo_vo2.result') AS DECIMAL(8,2))");
             $table->timestamps();
             $table->index(['athlete_id', 'tested_at']);
+            $table->index('yoyo_vo2_val');
         });
 
-        Schema::create('technique_tests', function (Blueprint $table) use ($metrics) {
+        Schema::create('technique_tests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('athlete_id')->constrained()->cascadeOnDelete();
             $table->date('tested_at');
             $table->string('venue', 150)->nullable();
-            foreach (array_keys($metrics['technique_metrics']) as $key) {
-                $table->decimal($key, 8, 2)->nullable();
-                $table->decimal($key . '_bm', 8, 2)->nullable();
-            }
+            $table->json('results')->nullable();
+            $table->decimal('qualification_val', 8, 2)
+                ->virtualAs("CAST(JSON_VALUE(`results`, '\$.qualification.result') AS DECIMAL(8,2))");
             $table->timestamps();
             $table->index(['athlete_id', 'tested_at']);
+            $table->index('qualification_val');
         });
 
         Schema::create('load_tests', function (Blueprint $table) {

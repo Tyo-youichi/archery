@@ -11,6 +11,10 @@ use App\Models\Athlete;
  *   % grup    = rata-rata % metrik dalam grup
  *   % profil  = rata-rata % semua grup
  *   kekurangan = 1 - %
+ *
+ * Definisi metrik & BM diambil dari App\Support\Metrics (tabel `metrics`, fallback config).
+ * Nilai tes diambil dari kolom JSON `results` pada record: { key => { result, bm } }.
+ * `bm` pada record adalah SNAPSHOT saat input; bila kosong pakai BM default metrik.
  */
 class ProfileService
 {
@@ -22,31 +26,44 @@ class ProfileService
 
         return [
             'anthropometry' => $anthro,
-            'physical'  => self::evaluate($phys, config('archery.physical_metrics'), config('archery.physical_groups'), $athlete->gender),
-            'technique' => self::evaluate($tech, config('archery.technique_metrics'), config('archery.technique_groups'), $athlete->gender),
+            'physical'  => self::evaluate($phys, Metrics::for('physical'), $athlete->gender),
+            'technique' => self::evaluate($tech, Metrics::for('technique'), $athlete->gender),
         ];
     }
 
-    /** @return array{record:mixed, metrics:array, groups:array, overall:?float} */
-    public static function evaluate($record, array $metrics, array $groups, ?string $gender): array
+    /**
+     * @param  array  $def  hasil Metrics::for(): ['metrics'=>[...], 'groups'=>[...]]
+     * @return array{record:mixed, metrics:array, groups:array, overall:?float}
+     */
+    public static function evaluate($record, array $def, ?string $gender): array
     {
+        $metrics = $def['metrics'] ?? [];
+        $groups  = $def['groups'] ?? [];
+
         $out = ['record' => $record, 'metrics' => [], 'groups' => [], 'overall' => null];
         if (! $record) {
             return $out;
         }
 
+        $results = $record->results ?? [];   // cast array pada model
         $byGroup = [];
-        foreach ($metrics as $key => $def) {
-            $result = $record->{$key};
-            $bm = $record->{$key . '_bm'} ?? self::defaultBm($def['bm'], $gender);
+
+        foreach ($metrics as $key => $m) {
+            $cell   = $results[$key] ?? null;
+            $result = is_array($cell) ? ($cell['result'] ?? null) : null;
+            $snapBm = is_array($cell) ? ($cell['bm'] ?? null) : null;
+
+            $bm = $snapBm ?? ($m['bm'][$gender] ?? $m['bm']['L'] ?? null);
+            $result = $result === null ? null : (float) $result;
+            $bm = $bm === null ? null : (float) $bm;
             $pct = ($result !== null && $bm > 0) ? min(1, $result / $bm) : null;
 
             $out['metrics'][$key] = [
-                'label' => $def['label'], 'result' => $result, 'bm' => $bm, 'pct' => $pct,
+                'label' => $m['label'], 'result' => $result, 'bm' => $bm, 'pct' => $pct,
                 'gap' => $pct === null ? null : 1 - $pct,
             ];
             if ($pct !== null) {
-                $byGroup[$def['group']][] = $pct;
+                $byGroup[$m['group']][] = $pct;
             }
         }
 
@@ -60,14 +77,5 @@ class ProfileService
         $out['overall'] = $gp ? array_sum($gp) / count($gp) : null;
 
         return $out;
-    }
-
-    private static function defaultBm($bm, ?string $gender): float
-    {
-        if (is_array($bm)) {
-            return (float) ($bm[$gender] ?? reset($bm));
-        }
-
-        return (float) $bm;
     }
 }

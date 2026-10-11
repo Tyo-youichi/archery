@@ -86,6 +86,15 @@
                 @empty<tr><td colspan="11" class="text-muted">Belum ada data.</td></tr>@endforelse
                 </tbody>
             </table></div>
+            @php $hr = $anthros->first(fn ($a) => $a->hr_rest || $a->hr_max || $a->hr_training); @endphp
+            @if($hr && ($hr->hr_rest || $hr->hr_max || $hr->hr_training))
+                <div class="card-title-sm mt-4 mb-3">Monitoring Denyut Nadi <small class="text-muted fw-normal">(acuan % = nadi maksimum · {{ $hr->measured_at->format('d/m/Y') }})</small></div>
+                <div class="hr-grid">
+                    @include('partials.hr-gauge', ['value' => $hr->hr_rest, 'max' => $hr->hr_max, 'color' => '#2f9e6b', 'label' => 'Denyut Nadi Istirahat'])
+                    @include('partials.hr-gauge', ['value' => $hr->hr_training, 'max' => $hr->hr_max, 'color' => '#e08a1e', 'label' => 'Denyut Nadi Latihan'])
+                    @include('partials.hr-gauge', ['value' => $hr->hr_max, 'max' => $hr->hr_max, 'color' => '#d93a3a', 'label' => 'Denyut Nadi Maksimum'])
+                </div>
+            @endif
             @if(count($charts['weight']['data']) > 1)
                 <div class="card-title-sm mt-4 mb-2">Grafik berat badan</div>
                 <canvas id="weight" height="80"></canvas>

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RbacSeeder::class,
             RoleUserSeeder::class,
             YoyoReferenceSeeder::class,
+            MetricSeeder::class,
         ]);
 
         // \App\Models\User::factory()->create([
