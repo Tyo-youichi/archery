@@ -16,7 +16,7 @@
     @forelse($athletes as $a)
         <tr>
             <td>{{ $a->code }}</td>
-            <td><a href="{{ route('athletes.show', $a) }}">{{ $a->name }}</a></td>
+            <td><span class="d-inline-flex align-items-center gap-2">@include('partials.avatar', ['url' => $a->photo_url, 'size' => 30, 'name' => $a->name])<a href="{{ route('athletes.show', $a) }}">{{ $a->name }}</a></span></td>
             <td>{{ $a->gender ?? '-' }}</td><td>{{ $a->age ?? '-' }}</td><td>{{ $a->division ?? '-' }}</td>
             <td>{{ config('archery.registration_types')[$a->registration_type] ?? $a->registration_type }}</td>
             <td>@if($a->is_active)<span class="badge text-bg-success">Aktif</span>@else<span class="badge text-bg-secondary">Nonaktif</span>@endif</td>

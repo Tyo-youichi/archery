@@ -10,11 +10,14 @@
 @endphp
 @section('content')
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-    <div>
-        <h1 class="h3 mb-1">{{ $athlete->name }}</h1>
-        <span class="badge text-bg-dark">{{ $athlete->code }}</span>
-        <span class="badge text-bg-secondary">{{ $athlete->division ?? 'Divisi -' }}</span>
-        <span class="badge text-bg-info">{{ config('archery.registration_types')[$athlete->registration_type] ?? '' }}</span>
+    <div class="d-flex align-items-center gap-3">
+        @include('partials.avatar', ['url' => $athlete->photo_url, 'size' => 72, 'name' => $athlete->name])
+        <div>
+            <h1 class="h3 mb-1">{{ $athlete->name }}</h1>
+            <span class="badge text-bg-dark">{{ $athlete->code }}</span>
+            <span class="badge text-bg-secondary">{{ $athlete->division ?? 'Divisi -' }}</span>
+            <span class="badge text-bg-info">{{ config('archery.registration_types')[$athlete->registration_type] ?? '' }}</span>
+        </div>
     </div>
     <div class="d-flex gap-2">
         <a class="btn btn-success btn-sm" href="{{ route('shoot-log.edit', $athlete) }}">📒 Buku Saku (100 arrow)</a>

@@ -7,6 +7,8 @@ use App\Models\Athlete;
 use App\Models\LoadTest;
 use App\Support\ProfileService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AthleteController extends Controller
 {
@@ -31,6 +33,7 @@ class AthleteController extends Controller
     public function store(Request $request)
     {
         $athlete = Athlete::create($this->validated($request));
+        $this->handlePhoto($request, $athlete);
 
         return redirect()->route('athletes.show', $athlete)->with('ok', 'Atlet ditambahkan.');
     }
@@ -88,15 +91,62 @@ class AthleteController extends Controller
     public function update(Request $request, Athlete $athlete)
     {
         $athlete->update($this->validated($request, $athlete));
+        $this->handlePhoto($request, $athlete);
 
         return redirect()->route('athletes.show', $athlete)->with('ok', 'Biodata diperbarui.');
     }
 
     public function destroy(Athlete $athlete)
     {
+        if ($athlete->photo) {
+            Storage::disk('athletes')->delete($athlete->photo);
+        }
         $athlete->delete();
 
         return redirect()->route('athletes.index')->with('ok', 'Atlet dihapus.');
+    }
+
+    /**
+     * Simpan foto atlet. Frontend sudah mengompres & mengubah ke .webp lalu
+     * mengirimnya sebagai data URL base64 di field `photo_data`. Server hanya
+     * memvalidasi (format webp, ukuran) dan menyimpan apa adanya — tanpa GD.
+     */
+    private function handlePhoto(Request $request, Athlete $athlete): void
+    {
+        $request->validate([
+            'photo_data'   => ['nullable', 'string', 'starts_with:data:image/webp;base64,', 'max:4000000'],
+            'remove_photo' => ['nullable', 'boolean'],
+        ]);
+
+        $disk = Storage::disk('athletes');
+
+        if ($request->boolean('remove_photo')) {
+            if ($athlete->photo) {
+                $disk->delete($athlete->photo);
+            }
+            $athlete->forceFill(['photo' => null])->save();
+
+            return;
+        }
+
+        $data = $request->input('photo_data');
+        if (! $data) {
+            return;
+        }
+
+        $binary = base64_decode(substr($data, strlen('data:image/webp;base64,')), true);
+        // Validasi magic bytes WEBP: "RIFF"...."WEBP"; batasi 2 MB.
+        if ($binary === false || strlen($binary) > 2 * 1024 * 1024
+            || substr($binary, 0, 4) !== 'RIFF' || substr($binary, 8, 4) !== 'WEBP') {
+            return;
+        }
+
+        if ($athlete->photo) {
+            $disk->delete($athlete->photo);
+        }
+        $file = $athlete->id . '_' . Str::random(8) . '.webp';
+        $disk->put($file, $binary);
+        $athlete->forceFill(['photo' => $file])->save();
     }
 
     private function validated(Request $request, ?Athlete $athlete = null): array

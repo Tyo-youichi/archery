@@ -39,4 +39,10 @@ class Athlete extends Model
     {
         return match ($this->gender) { 'L' => 'Laki-laki', 'P' => 'Perempuan', default => '-' };
     }
+
+    /** URL foto atlet (null bila belum ada; frontend menampilkan avatar anonim). */
+    public function getPhotoUrlAttribute(): ?string
+    {
+        return $this->photo ? asset('uploads/athletes/' . $this->photo) : null;
+    }
 }

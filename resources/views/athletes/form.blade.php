@@ -5,6 +5,23 @@
     <h1 class="h4 mb-3">{{ $athlete->exists ? 'Edit biodata' : 'Atlet baru' }}</h1>
     <form method="post" action="{{ $athlete->exists ? route('athletes.update', $athlete) : route('athletes.store') }}" class="row g-3">
         @csrf @if($athlete->exists) @method('PUT') @endif
+
+        {{-- Foto atlet: dikompres di browser & disimpan sebagai .webp --}}
+        <div class="col-12">
+            <label class="form-label">Foto</label>
+            <div class="d-flex align-items-center gap-3">
+                <span id="photoPreview">@include('partials.avatar', ['url' => $athlete->photo_url, 'size' => 96, 'name' => $athlete->name])</span>
+                <div>
+                    <input type="file" id="photoFile" accept="image/*" class="form-control form-control-sm" style="max-width:320px">
+                    <input type="hidden" name="photo_data" id="photoData">
+                    <div class="form-text">JPG/PNG/WEBP. Otomatis dikompres ke WEBP (maks sisi 512px). Kosongkan untuk pakai avatar anonim.</div>
+                    @if($athlete->photo)
+                        <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="remove_photo" value="1" id="rmPhoto"><label class="form-check-label small" for="rmPhoto">Hapus foto saat ini</label></div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         <div class="col-md-3"><label class="form-label">Kode</label><input name="code" value="{{ old('code', $athlete->code) }}" class="form-control" required></div>
         <div class="col-md-9"><label class="form-label">Nama</label><input name="name" value="{{ old('name', $athlete->name) }}" class="form-control" required></div>
         <div class="col-md-4"><label class="form-label">Tempat lahir</label><input name="birth_place" value="{{ old('birth_place', $athlete->birth_place) }}" class="form-control"></div>
@@ -20,4 +37,58 @@
         <div class="col-12"><button class="btn btn-primary">Simpan</button> <a class="btn btn-link" href="{{ $athlete->exists ? route('athletes.show',$athlete) : route('athletes.index') }}">Batal</a></div>
     </form>
 </div></div>
+
+@push('scripts')
+<script>
+(function () {
+    const MAX = 512, QUALITY = 0.8;
+    const file = document.getElementById('photoFile');
+    const hidden = document.getElementById('photoData');
+    const preview = document.getElementById('photoPreview');
+    const remove = document.getElementById('rmPhoto');
+    if (!file) return;
+
+    file.addEventListener('change', function () {
+        const f = file.files && file.files[0];
+        if (!f) return;
+        if (!f.type.startsWith('image/')) { alert('File harus berupa gambar.'); file.value = ''; return; }
+
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = e => { img.src = e.target.result; };
+        img.onload = function () {
+            let { width: w, height: h } = img;
+            if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+            else if (h >= w && h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+            canvas.toBlob(function (blob) {
+                if (!blob || blob.type !== 'image/webp') {
+                    alert('Browser Anda tidak mendukung konversi WEBP. Pakai Chrome/Edge/Firefox terbaru.');
+                    return;
+                }
+                const r = new FileReader();
+                r.onload = ev => {
+                    hidden.value = ev.target.result;                 // data:image/webp;base64,...
+                    preview.innerHTML = '<img src="' + ev.target.result + '" class="rounded-circle border" style="width:96px;height:96px;object-fit:cover" alt="Pratinjau">';
+                    if (remove) { remove.checked = false; }
+                };
+                r.readAsDataURL(blob);
+            }, 'image/webp', QUALITY);
+        };
+        reader.readAsDataURL(f);
+    });
+
+    if (remove) {
+        remove.addEventListener('change', function () {
+            if (remove.checked) { hidden.value = ''; file.value = ''; preview.style.opacity = .4; }
+            else { preview.style.opacity = 1; }
+        });
+    }
+})();
+</script>
+@endpush
 @endsection

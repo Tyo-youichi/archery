@@ -44,6 +44,16 @@ return [
             'throw' => false,
         ],
 
+        // Foto atlet disimpan langsung di public/uploads/athletes (tanpa perlu
+        // `php artisan storage:link`), supaya ramah shared hosting.
+        'athletes' => [
+            'driver' => 'local',
+            'root' => public_path('uploads/athletes'),
+            'url' => env('APP_URL').'/uploads/athletes',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
