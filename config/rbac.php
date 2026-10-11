@@ -34,6 +34,7 @@ return [
     | (kepemilikan data, mis. atlet lihat profil sendiri, dicek di controller).
     */
     'routes' => [
+        'rbac.*'           => ['admin'],              // pengelolaan RBAC: admin saja
         'athletes.destroy' => ['admin'],              // hanya admin boleh hapus atlet
         'athletes.index'   => ['admin', 'coach'],
         'athletes.create'  => ['admin', 'coach'],
@@ -57,6 +58,7 @@ return [
         ['label' => 'Dashboard',    'route' => 'dashboard',      'roles' => ['admin', 'coach', 'athlete']],
         ['label' => 'Atlet',        'route' => 'athletes.index', 'roles' => ['admin', 'coach']],
         ['label' => 'Head to Head', 'route' => 'h2h',            'roles' => ['admin', 'coach']],
+        ['label' => 'Akses (RBAC)', 'route' => 'rbac.roles.index', 'roles' => ['admin']],
         ['label' => 'Profil Saya',  'route' => 'athletes.show',  'roles' => ['athlete'], 'param' => 'self_athlete'],
         ['label' => 'Buku Saku',    'route' => 'shoot-log.edit', 'roles' => ['athlete'], 'param' => 'self_athlete'],
     ],

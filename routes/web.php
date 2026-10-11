@@ -5,7 +5,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\HeadToHeadController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RoutePermissionController;
 use App\Http\Controllers\ShootLogController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,4 +56,17 @@ Route::middleware(['auth', 'rbac'])->group(function () {
     });
 
     Route::get('/head-to-head', [HeadToHeadController::class, 'index'])->name('h2h');
+
+    /*
+     * Pengelolaan RBAC (CRUD roles, izin route, menu). Khusus admin.
+     * Hard guard 'role:admin' dipasang eksplisit agar aman walau data RBAC di DB
+     * belum di-seed (tidak bergantung pada config/DB route_permissions).
+     */
+    Route::middleware('role:admin')->prefix('rbac')->name('rbac.')->group(function () {
+        Route::resource('roles', RoleController::class)->except(['show']);
+        Route::resource('permissions', RoutePermissionController::class)->except(['show'])
+            ->parameters(['permissions' => 'permission']);
+        Route::resource('menus', MenuController::class)->except(['show'])
+            ->parameters(['menus' => 'menu']);
+    });
 });
