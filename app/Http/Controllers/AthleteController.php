@@ -50,19 +50,30 @@ class AthleteController extends Controller
         $loads = LoadTest::where('athlete_id', $athlete->id)->orderByDesc('tested_at')->orderByDesc('id')
             ->get()->unique('exercise')->values();
 
+        // Visualisasi per dimensi (untuk tab Data Visual): donut, radar BM-vs-hasil, bar hasil-vs-BM.
+        $pct100 = fn ($v) => $v === null ? 0 : round($v * 100, 1);
+        $vizDim = fn (array $ev) => [
+            'overall'      => $pct100($ev['overall']),
+            'groupLabels'  => array_values(array_column($ev['groups'], 'label')),
+            'groupPct'     => array_map($pct100, array_values(array_column($ev['groups'], 'pct'))),
+            'metricLabels' => array_values(array_column($ev['metrics'], 'label')),
+            'metricPct'    => array_map($pct100, array_values(array_column($ev['metrics'], 'pct'))),
+            'metricResult' => array_map(fn ($v) => $v === null ? null : (float) $v, array_values(array_column($ev['metrics'], 'result'))),
+            'metricBm'     => array_map(fn ($v) => $v === null ? null : (float) $v, array_values(array_column($ev['metrics'], 'bm'))),
+        ];
+
+        $scoreQ = $scores->whereNotNull('score');
+
         $charts = [
             'radar' => [
                 'labels' => array_merge(
                     array_column($profile['physical']['groups'], 'label'),
                     array_column($profile['technique']['groups'], 'label')
                 ),
-                'data' => array_map(
-                    fn ($v) => $v === null ? 0 : round($v * 100, 1),
-                    array_merge(
-                        array_column($profile['physical']['groups'], 'pct'),
-                        array_column($profile['technique']['groups'], 'pct')
-                    )
-                ),
+                'data' => array_map($pct100, array_merge(
+                    array_column($profile['physical']['groups'], 'pct'),
+                    array_column($profile['technique']['groups'], 'pct')
+                )),
             ],
             'scores' => [
                 'labels' => $scores->map(fn ($s) => substr($s->month_name, 0, 3) . ' ' . $s->year)->all(),
@@ -72,6 +83,14 @@ class AthleteController extends Controller
                 'labels' => $anthros->map(fn ($a) => $a->measured_at->format('d M y'))->all(),
                 'data' => $anthros->pluck('weight_kg')->map(fn ($v) => $v === null ? null : (float) $v)->all(),
             ],
+            'physical' => $vizDim($profile['physical']),
+            'technique' => $vizDim($profile['technique']),
+            'load' => [
+                'labels' => $loads->pluck('exercise')->all(),
+                'data' => $loads->pluck('one_rm')->map(fn ($v) => (float) $v)->all(),
+            ],
+            'bestScore' => $scoreQ->max('score'),
+            'lowScore' => $scoreQ->min('score'),
         ];
 
         return view('athletes.show', [
