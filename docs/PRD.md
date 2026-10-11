@@ -43,14 +43,17 @@ Ada tiga peran. Atlet hanya mengakses datanya sendiri; admin dan pelatih mengaks
 | --- | --- | --- | --- |
 | Registrasi mandiri (`/register`) | - | - | Ya |
 | Lihat daftar semua atlet | Ya | Ya | Tidak |
-| Tambah / ubah / hapus atlet | Ya | Ya | Tidak |
+| Tambah / ubah atlet | Ya | Ya | Tidak |
+| Hapus atlet | Ya | Tidak | Tidak |
+| Upload foto atlet | Ya | Ya | Tidak |
 | Lihat profil | Semua atlet | Semua atlet | Profil sendiri |
 | Input antropometri, tes fisik, teknik, beban, skor, peralatan | Ya | Ya | Tidak |
 | Isi Buku Saku (100 arrow) | Ya | Ya | Milik sendiri |
 | Head to Head | Ya | Ya | Tidak |
-| Buat akun admin / pelatih | Via perintah `archery:make-user` | - | - |
+| Kelola RBAC (role, izin route, menu) | Ya | Tidak | Tidak |
+| Buat akun admin / pelatih | Via `archery:make-user` | - | - |
 
-Peran admin dan pelatih saat ini memiliki hak yang sama; pembedaan (mis. hanya admin boleh menghapus atlet) belum diputuskan.
+Role dan izin dikelola berbasis **database** (tabel `roles`, `route_permissions`, `menus`) yang di-seed dari `config/rbac.php`, dan dapat diubah admin lewat halaman **Pengaturan Akses (RBAC)**. Admin dan pelatih memiliki hak manajemen yang sama, kecuali **menghapus atlet** dan **mengelola RBAC** yang hanya untuk admin.
 
 ## 4. Ruang lingkup
 
@@ -64,10 +67,12 @@ Rilis 1 mencakup modul inti monitoring (di bawah). Pembayaran, tugas pelatih, da
 | Buku Saku: monitor shoot 100 arrow mingguan | Ya | - |
 | Head to Head | Ya | - |
 | Impor dari Excel ATHTRIX | Ya | - |
+| Upload foto atlet (kompres di browser, format WEBP) | Ya | - |
+| RBAC: role & izin berbasis DB + halaman kelola (admin) | Ya | - |
 | Pembayaran bulanan, bukti transfer, konfirmasi admin, blokir akses bila lewat batas | - | Ya |
 | Task dan Result task (tes yang ditugaskan pelatih) | - | Ya |
 | Notifikasi WhatsApp lewat Laravel scheduler | - | Ya |
-| Upload foto atlet | - | Ya |
+| Mapping atlet – pelatih | - | Ya |
 | Data visual lanjutan (cetak/PDF printout beban) | - | Ya |
 
 **Di luar lingkup:** aplikasi mobile native, integrasi payment gateway (pembayaran memakai transfer manual), dan pencatatan skor per anak panah saat pertandingan.
@@ -76,23 +81,26 @@ Rilis 1 mencakup modul inti monitoring (di bawah). Pembayaran, tugas pelatih, da
 
 | ID | Modul | Kebutuhan | Prioritas |
 | --- | --- | --- | --- |
-| F-01 | Autentikasi | Pengguna login dengan email dan password; sesi dapat diingat; percobaan login dibatasi 10 per menit. | Wajib |
-| F-02 | Registrasi | Atlet mendaftar mandiri dengan nama, email, password (min. 8 karakter), jenis kelamin, tanggal lahir, asal daerah, divisi, dan jenis pendaftaran (reguler, prestasi, terapi ABK). Role selalu atlet; kode atlet dibuat otomatis (ATL{n}). | Wajib |
-| F-03 | Database atlet | Staf melihat daftar atlet (cari nama atau kode, filter divisi, 25 per halaman) dan mengelola biodata. | Wajib |
-| F-04 | Antropometri | Simpan tinggi badan, tinggi duduk, berat badan, panjang tungkai, panjang lengan, rentang lengan, lebar bahu, dan denyut nadi (istirahat, maksimal, latihan) per tanggal. IMT dan kategorinya dihitung otomatis; grafik berat badan ditampilkan. | Wajib |
-| F-05 | Tes fisik | Simpan Yo-Yo IR1 (level dan VO2max), Standing Stork kanan dan kiri, Grip Strength kanan dan kiri, Bench Pull, dan Core Stability per tanggal, dengan BM yang bisa diubah per tes. VO2max terisi otomatis dari tabel referensi Yo-Yo bila hanya level yang diisi. | Wajib |
-| F-06 | Performa teknik | Simpan skor kualifikasi, skor eliminasi, maximal shooting, bow training, bow draw, battery test, dan speed shooting per tanggal, dengan BM per tes. | Wajib |
-| F-07 | Data beban | Simpan beban dan repetisi untuk 17 latihan; 1RM dihitung otomatis; profil menampilkan 1RM terbaru per latihan. | Wajib |
-| F-08 | Skor bulanan | Simpan skor, tempat, dan analisis per bulan dan tahun; mendukung skor dua babak (mis. 307+304); ditampilkan sebagai tabel dan grafik garis. | Wajib |
-| F-09 | Peralatan | Simpan 15 komponen peralatan per atlet (riser, limbs, sight, scope, plunger, clicker, arrow rest, stabilizer, side stabilizer, weight, string, peep sight, arrow, finger tab / release, stand). | Wajib |
-| F-10 | Dashboard profil | Satu halaman per atlet: biodata, profil % capaian terhadap BM per item dan per grup, grafik radar, riwayat, dan akses ke seluruh data di atas. | Wajib |
-| F-11 | Buku Saku | Tabel mingguan Senin sampai Sabtu: centang teknik yang diperbaiki (a Grip, b Set-up, c Full Draw & Ancore, d Iming & Focus, e Release, f Follow Through), pilihan Ya atau Tidak untuk shoot 100 arrow, dan catatan. Navigasi antar minggu dan rekap 8 minggu terakhir. Atlet mengisi milik sendiri. | Wajib |
-| F-12 | Head to Head | Staf memilih dua atlet; sistem menampilkan radar profil, antropometri, persentase per item fisik dan teknik, skor terbaik, dan rata-rata skor. | Wajib |
-| F-13 | Dashboard staf | Jumlah atlet aktif, rata-rata profil fisik dan teknik tim, dan jumlah hari shoot 100 arrow per atlet minggu ini. | Wajib |
-| F-14 | Impor Excel | Perintah `archery:import-excel` mengimpor atlet dan semua data berseri dari file ATHTRIX; pencocokan antar-sheet berdasarkan nama; aman dijalankan ulang. | Wajib |
-| F-15 | Pembayaran | Biaya bulanan, atlet unggah bukti transfer, admin konfirmasi, notifikasi bila belum bayar, akses diblokir bila lewat batas waktu. | Rilis berikutnya |
-| F-16 | Task dan Result task | Pelatih menugaskan tes ke atlet; hasil mengalir ke profil dan Head to Head. Definisi belum dikonfirmasi penuh. | Rilis berikutnya |
+| F-01 | Autentikasi | Login dengan email dan password; sesi dapat diingat; percobaan login dibatasi 10 per menit; proteksi CSRF pada semua form. | Wajib |
+| F-02 | Registrasi | Atlet mendaftar mandiri (nama, email, password min. 8 karakter, jenis kelamin, tanggal lahir, asal daerah, divisi, jenis pendaftaran). Role selalu atlet; kode atlet otomatis (ATL{n}). | Wajib |
+| F-03 | Database atlet | Staf melihat daftar atlet (cari nama/kode, filter divisi, 25 per halaman) dan mengelola biodata. | Wajib |
+| F-04 | Antropometri | Simpan 7 ukuran tubuh + 3 denyut nadi per tanggal; IMT & kategori otomatis; grafik berat badan. | Wajib |
+| F-05 | Tes fisik | Simpan Yo-Yo IR1, Standing Stork ka/ki, Grip ka/ki, Bench Pull, Core per tanggal; BM dapat diubah per tes; VO2max otomatis dari tabel referensi. | Wajib |
+| F-06 | Performa teknik | Simpan kualifikasi, eliminasi, maximal shooting, bow training, bow draw, battery, speed shooting per tanggal; BM per tes. | Wajib |
+| F-07 | Data beban | Simpan beban & repetisi 17 latihan; 1RM otomatis; profil menampilkan 1RM terbaru per latihan. | Wajib |
+| F-08 | Skor bulanan | Simpan skor, tempat, analisis per bulan & tahun; dukung skor dua babak (307+304); tabel + grafik garis. | Wajib |
+| F-09 | Peralatan | Simpan 15 komponen peralatan per atlet. | Wajib |
+| F-10 | Dashboard profil | Satu halaman per atlet: biodata, profil % vs BM per item & grup, radar, riwayat, foto. | Wajib |
+| F-11 | Buku Saku | Tabel mingguan Sn–Sb: teknik diperbaiki (a–f), shoot 100 arrow Ya/Tidak, catatan; navigasi minggu; rekap 8 minggu; atlet isi milik sendiri. | Wajib |
+| F-12 | Head to Head | Bandingkan dua atlet: radar, antropometri, % per item, skor terbaik, rata-rata skor. | Wajib |
+| F-13 | Dashboard staf | Jumlah atlet aktif, rata-rata profil fisik & teknik tim, hari shoot 100 arrow per atlet minggu ini. | Wajib |
+| F-14 | Impor Excel | `archery:import-excel` mengimpor atlet & data berseri dari ATHTRIX; cocok berdasarkan nama; aman diulang. | Wajib |
+| F-18 | Upload foto atlet | Foto dipilih lalu dikompres di browser (maks sisi 512px) dan dikonversi ke WEBP, disimpan di `public/uploads/athletes` (tanpa storage:link); server memvalidasi format & ukuran; bila kosong tampil avatar anonim. | Wajib |
+| F-19 | Pengelolaan RBAC | Admin mengelola role, izin per-route, dan menu dari UI (CRUD). Data di DB, di-seed dari `config/rbac.php`; perubahan langsung berlaku (cache di-flush). | Wajib |
+| F-15 | Pembayaran | Biaya bulanan, atlet unggah bukti transfer, admin konfirmasi, notifikasi bila belum bayar, akses diblokir bila lewat batas. | Rilis berikutnya |
+| F-16 | Task & Result task | Pelatih menugaskan tes ke atlet; hasil mengalir ke profil & Head to Head. Belum dikonfirmasi penuh. | Rilis berikutnya |
 | F-17 | Notifikasi WhatsApp | Pengingat ke nomor WhatsApp, dipicu Laravel scheduler. | Rilis berikutnya |
+| F-20 | Mapping atlet–pelatih | Tiap atlet terhubung ke satu pelatih; opsi membatasi pelatih hanya ke atlet binaannya. Belum dikonfirmasi. | Rilis berikutnya |
 
 ## 6. Aturan bisnis dan rumus
 
@@ -138,20 +146,23 @@ BM teknik default: kualifikasi 625, eliminasi 135, maximal shooting 350, bow tra
 
 ## 7. Model data
 
-Skema MariaDB (utf8mb4) terdiri dari 10 tabel domain ditambah 3 tabel bawaan Laravel. Seluruh data berseri terikat ke `athletes` dan ikut terhapus bila atlet dihapus.
+Skema MariaDB (utf8mb4) terdiri dari 10 tabel domain, 3 tabel RBAC, dan 3 tabel bawaan Laravel. Seluruh data berseri terikat ke `athletes` dan ikut terhapus bila atlet dihapus. Kolom `users.role` memakai varchar (bukan enum) agar role bisa ditambah dari database.
 
 | Tabel | Isi utama | Catatan |
 | --- | --- | --- |
-| `users` | nama, email, password, role (admin, coach, athlete), phone | Role bawaan: athlete |
-| `athletes` | kode unik, nama, tempat dan tanggal lahir, jenis kelamin (L/P), asal daerah, divisi, jenis pendaftaran, status aktif | `user_id` opsional (akun atlet) |
+| `users` | nama, email, password, role (kode), phone | `role` varchar merujuk tabel `roles` |
+| `athletes` | kode unik, nama, tempat & tanggal lahir, gender (L/P), asal, divisi, jenis pendaftaran, foto, status aktif | `user_id` opsional; `photo` = nama file WEBP |
 | `anthropometries` | tanggal ukur, 7 ukuran tubuh, 3 denyut nadi | IMT dihitung saat ditampilkan |
-| `physical_tests` | tanggal tes, tempat, level Yo-Yo, 7 hasil dan 7 BM | BM kosong berarti memakai default |
-| `technique_tests` | tanggal tes, tempat, 7 hasil dan 7 BM | Sama dengan fisik |
-| `load_tests` | tanggal, latihan, beban, repetisi, 1RM | 1RM dihitung otomatis |
-| `monthly_scores` | tahun, bulan, skor, catatan skor, tempat, analisis | Boleh lebih dari satu per bulan |
+| `physical_tests` | tanggal, tempat, level Yo-Yo, 7 hasil & 7 BM | BM kosong = default |
+| `technique_tests` | tanggal, tempat, 7 hasil & 7 BM | Sama dengan fisik |
+| `load_tests` | tanggal, latihan, beban, repetisi, 1RM | 1RM otomatis |
+| `monthly_scores` | tahun, bulan, skor, catatan skor, tempat, analisis | Boleh > 1 per bulan |
 | `equipments` | 15 komponen peralatan | Satu baris per atlet |
-| `shoot_logs` | tanggal, teknik diperbaiki (JSON a sampai f), shoot 100 arrow (ya/tidak), catatan | Unik per atlet dan tanggal |
+| `shoot_logs` | tanggal, teknik diperbaiki (JSON a–f), shoot 100 arrow, catatan | Unik per atlet & tanggal |
 | `yoyo_references` | level, VO2max | 91 baris dari sheet referensi Excel |
+| `roles` | code, name, is\_staff, sort | Role RBAC; di-seed dari `config/rbac.php` |
+| `route_permissions` | pattern (nama route, boleh wildcard), roles (JSON), sort | Izin per-route |
+| `menus` | label, route, param, roles (JSON), sort, is\_active | Menu sidebar per role |
 | `password_reset_tokens`, `failed_jobs`, `personal_access_tokens` | Tabel bawaan Laravel | Belum dipakai fitur |
 
 Daftar metrik, BM, grup, kode teknik, dan definisi formulir disimpan di berkas konfigurasi `config/archery.php`, sehingga menambah item tes tidak memerlukan perubahan kode controller.
@@ -163,12 +174,14 @@ Arsitektur monolit Laravel 10 dengan antarmuka Blade, berjalan di PHP 8.1 dan Ma
 | Aspek | Kebutuhan |
 | --- | --- |
 | Platform | PHP 8.1, Laravel 10, MariaDB; ekstensi PHP standar Laravel (mbstring, pdo\_mysql, zip, dll.) |
-| Antarmuka | Blade + Bootstrap 5 dan Chart.js dari CDN; tanpa npm atau proses build; responsif untuk ponsel (atlet mengisi Buku Saku dari ponsel) |
-| Keamanan | Password di-hash; proteksi CSRF; role dicek di middleware dan controller; atlet tidak bisa membuka data atlet lain; role tidak bisa dipilih saat registrasi; throttle pada login dan registrasi |
-| Kompatibilitas DB | Panjang string default 191 agar aman di MariaDB atau MySQL lama pada shared hosting |
+| Antarmuka | Blade + Bootstrap 5 dan Chart.js dari CDN; tanpa npm atau proses build; monolit server-rendered (bukan SPA); responsif untuk ponsel |
+| Keamanan | Password di-hash; proteksi CSRF; RBAC per-route via middleware; atlet tidak bisa membuka data atlet lain; role tidak bisa dipilih saat registrasi; throttle login & registrasi |
+| RBAC | Role, izin per-route, dan menu berbasis DB (di-seed dari `config/rbac.php`), dibaca dengan cache yang di-flush saat berubah; dikelola admin via UI |
+| Foto atlet | Dikompres di sisi klien ke WEBP (maks sisi 512px), disimpan di `public/uploads` tanpa storage:link; server memvalidasi magic bytes WEBP & ukuran (maks 2 MB) |
+| Kompatibilitas DB | Panjang string default 191 agar aman di MariaDB/MySQL lama pada shared hosting |
 | Akurasi | Rumus profil diuji unit terhadap angka Excel (`tests/Unit/ProfileServiceTest.php`) |
-| Pemeliharaan | Metrik dan BM dikonfigurasi di satu berkas; impor Excel dapat dijalankan ulang tanpa duplikasi |
-| Privasi | Sebagian atlet masih remaja; data hanya diakses pengguna terautentikasi, dan perlu persetujuan orang tua atau klub sebelum data nyata dipakai di server publik |
+| Pemeliharaan | Metrik & BM dikonfigurasi di satu berkas; impor Excel dapat diulang tanpa duplikasi |
+| Privasi | Sebagian atlet masih remaja; data hanya diakses pengguna terautentikasi, perlu persetujuan orang tua/klub sebelum data nyata dipakai di server publik |
 
 API terpisah atau SPA tidak diperlukan pada rilis 1.
 
@@ -178,9 +191,9 @@ API terpisah atau SPA tidak diperlukan pada rilis 1.
 
 | Rilis | Isi | Status |
 | --- | --- | --- |
-| 1 | Login, registrasi, profil, data tes, Buku Saku, Head to Head, impor Excel | Kode ditulis, belum diuji di server |
-| 2 | Pembayaran bulanan dan pembatasan akses; Task dan Result task | Belum dimulai |
-| 3 | Notifikasi WhatsApp; upload foto; printout beban | Belum dimulai |
+| 1 | Login, registrasi, profil, data tes, Buku Saku, Head to Head, impor Excel, upload foto, RBAC (DB + UI) | Kode ditulis, belum diuji di server |
+| 2 | Pembayaran bulanan & pembatasan akses; Task & Result task; mapping atlet–pelatih | Belum dimulai |
+| 3 | Notifikasi WhatsApp; printout beban; upload foto oleh atlet sendiri | Belum dimulai |
 
 **Estimasi dari file leads.** Sheet Mandays memperkirakan total 59 mandays dengan tarif Rp1.000.000 per manday, yaitu Rp59.000.000, mencakup semua item di Sheet1 termasuk pembayaran dan registrasi. Item terbesar adalah Test Fisik dan Beban Max (masing-masing 5), Pembayaran (5), dan Data Visual (4).
 
@@ -204,9 +217,10 @@ API terpisah atau SPA tidak diperlukan pada rilis 1.
 
 **Pertanyaan terbuka**
 
-- [ ] Apakah admin dan pelatih perlu hak berbeda (mis. hanya admin boleh menghapus atlet)?
+- [ ] Mapping atlet–pelatih: satu atlet tepat satu pelatih, dan apakah pelatih hanya boleh mengakses atlet binaannya?
 - [ ] Siapa yang membuat akun atlet bila tidak mendaftar sendiri, dan bagaimana menghubungkannya ke data hasil impor?
 - [ ] Berapa besar iuran bulanan dan batas waktu pembayaran sebelum akses diblokir?
 - [ ] Apakah atlet perlu melihat Head to Head atau hanya pelatih?
 - [ ] Apakah daftar divisi dan benchmark sudah final, dan siapa yang berwenang mengubahnya?
 - [ ] Apakah Buku Saku perlu dikunci setelah minggu berlalu?
+- [ ] Apakah atlet boleh mengunggah fotonya sendiri dari halaman profil?

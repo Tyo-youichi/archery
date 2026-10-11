@@ -1,0 +1,207 @@
+/* =========================================================================
+   Archer Monitor — tema UI
+   Terinspirasi muka target panahan: teal (cincin biru), emas (gold tengah).
+   Dipakai di atas Bootstrap 5. Font: Plus Jakarta Sans (dimuat di layout).
+   ========================================================================= */
+
+:root {
+    --teal:       #0e6e78;
+    --teal-700:   #0b545c;
+    --teal-050:   #e4f0f1;
+    --gold:       #f2b01e;
+    --gold-700:   #cf9410;
+    --ink:        #152a30;
+    --muted:      #5f757c;
+    --bg:         #eceff1;
+    --surface:    #ffffff;
+    --line:       #e4eaec;
+    --good:       #2f9e6b;
+    --warn:       #e0a310;
+    --bad:        #d6473f;
+    --radius:     16px;
+    --radius-sm:  10px;
+    --shadow:     0 10px 30px -14px rgba(13, 64, 70, .28);
+    --shadow-sm:  0 4px 14px -8px rgba(13, 64, 70, .22);
+}
+
+* { -webkit-font-smoothing: antialiased; }
+
+body {
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    letter-spacing: -0.005em;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5 { font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+
+a { color: var(--teal); text-underline-offset: 2px; }
+a:hover { color: var(--teal-700); }
+
+.text-muted { color: var(--muted) !important; }
+
+/* ---------- App bar ---------------------------------------------------- */
+.app-navbar {
+    background: linear-gradient(100deg, var(--teal) 0%, var(--teal-700) 100%);
+    box-shadow: var(--shadow-sm);
+}
+.app-navbar .navbar-brand { color: #fff; font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: .55rem; }
+.app-navbar .navbar-brand .brand-sub { font-weight: 500; opacity: .8; }
+.app-navbar .navbar-toggler { border-color: rgba(255,255,255,.4); }
+.app-navbar .navbar-toggler-icon { filter: brightness(0) invert(1); }
+
+.app-navbar .nav-link {
+    color: rgba(255,255,255,.82);
+    font-weight: 600;
+    font-size: .95rem;
+    padding: .35rem .2rem;
+    margin: 0 .7rem;
+    border-bottom: 2.5px solid transparent;
+    transition: color .15s, border-color .15s;
+}
+.app-navbar .nav-link:hover { color: #fff; }
+.app-navbar .nav-link.active { color: #fff; border-bottom-color: var(--gold); }
+
+.app-user { display: flex; align-items: center; gap: .7rem; }
+.app-user__name { color: #fff; font-weight: 600; line-height: 1.1; font-size: .92rem; }
+.app-user__role { color: rgba(255,255,255,.72); font-size: .72rem; font-weight: 500; }
+
+.avatar-initials {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.18); color: #fff; font-weight: 700;
+    border-radius: 50%; width: 38px; height: 38px; font-size: .9rem; flex: 0 0 auto;
+}
+
+/* Brand target-ring mark */
+.brand-mark { width: 30px; height: 30px; flex: 0 0 auto; }
+
+/* ---------- Cards ------------------------------------------------------ */
+.card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    background: var(--surface);
+}
+.card .card-body { padding: 1.25rem 1.35rem; }
+
+/* Section heading inside a card — no all-caps */
+.card-title-sm {
+    font-size: .8rem;
+    letter-spacing: 0;
+    text-transform: none;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+/* ---------- Buttons --------------------------------------------------- */
+.btn { border-radius: 999px; font-weight: 600; letter-spacing: -0.01em; padding: .5rem 1.15rem; }
+.btn-sm { padding: .32rem .8rem; }
+.btn-lg, .w-100.btn, .btn.w-100 { border-radius: 14px; }
+
+.btn-primary { background: var(--teal); border-color: var(--teal); }
+.btn-primary:hover, .btn-primary:focus { background: var(--teal-700); border-color: var(--teal-700); }
+.btn-check:focus + .btn-primary, .btn-primary:focus { box-shadow: 0 0 0 .22rem rgba(14,110,120,.28); }
+
+.btn-accent { background: var(--gold); border-color: var(--gold); color: #3a2c05; }
+.btn-accent:hover { background: var(--gold-700); border-color: var(--gold-700); color: #3a2c05; }
+
+.btn-outline-primary { color: var(--teal); border-color: var(--teal); }
+.btn-outline-primary:hover { background: var(--teal); border-color: var(--teal); }
+.btn-outline-secondary { color: var(--muted); border-color: var(--line); }
+.btn-outline-secondary:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn-success { background: var(--good); border-color: var(--good); }
+.btn-outline-danger { color: var(--bad); border-color: #eac4c1; }
+.btn-outline-danger:hover { background: var(--bad); border-color: var(--bad); }
+.btn-outline-light { border-color: rgba(255,255,255,.45); }
+.btn-link { text-decoration: none; font-weight: 600; }
+
+/* ---------- Badges (soft, tinted) ------------------------------------ */
+.badge { font-weight: 600; border-radius: 999px; padding: .36em .7em; letter-spacing: 0; }
+.text-bg-primary   { background: var(--teal-050) !important;  color: var(--teal-700) !important; }
+.text-bg-info      { background: var(--teal-050) !important;  color: var(--teal-700) !important; }
+.text-bg-dark      { background: #e5eaec !important;          color: var(--ink) !important; }
+.text-bg-secondary { background: #eaeef0 !important;          color: var(--muted) !important; }
+.text-bg-success   { background: #e2f3ea !important;          color: #1f7a50 !important; }
+
+/* ---------- Tables ---------------------------------------------------- */
+.table { --bs-table-color: var(--ink); margin-bottom: 0; }
+.table > thead th {
+    border-bottom: 1px solid var(--line);
+    color: var(--muted); font-weight: 600; font-size: .8rem;
+    text-transform: none; letter-spacing: 0; padding-top: .7rem; padding-bottom: .7rem;
+}
+.table > tbody td { border-color: #eef2f3; vertical-align: middle; }
+.table-hover > tbody > tr:hover > * { background: #f6f9f9; }
+.table-compact td, .table-compact th { padding: .5rem .6rem; font-size: .9rem; }
+.card > .table-responsive:first-child, .card > .table-responsive:last-child { border-radius: var(--radius); overflow: hidden; }
+
+/* ---------- Forms ----------------------------------------------------- */
+.form-control, .form-select {
+    border-radius: var(--radius-sm);
+    border-color: var(--line);
+    padding: .5rem .8rem;
+    color: var(--ink);
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 .2rem rgba(14,110,120,.16);
+}
+.form-label { font-weight: 600; font-size: .86rem; color: #2c4047; margin-bottom: .3rem; }
+.form-text { color: var(--muted); }
+.form-check-input:checked { background-color: var(--teal); border-color: var(--teal); }
+.form-check-input:focus { box-shadow: 0 0 0 .2rem rgba(14,110,120,.16); border-color: var(--teal); }
+
+/* ---------- Progress (capaian % vs benchmark) ------------------------- */
+.progress { background: #eaeef0; border-radius: 999px; }
+.pct-bar { height: .55rem; }
+.progress-bar { border-radius: 999px; }
+.progress-bar.bg-success { background: var(--good) !important; }
+.progress-bar.bg-warning { background: var(--warn) !important; }
+.progress-bar.bg-danger  { background: var(--bad) !important; }
+.progress-bar.bg-secondary { background: #c4ced2 !important; }
+
+/* ---------- Alerts ---------------------------------------------------- */
+.alert { border-radius: var(--radius-sm); border: 0; }
+.alert-success { background: #e2f3ea; color: #1f7a50; }
+.alert-danger  { background: #fbe8e6; color: #a7352e; }
+.alert-info    { background: var(--teal-050); color: var(--teal-700); }
+
+/* ---------- Stat tiles (dashboard) ----------------------------------- */
+.stat { display: flex; align-items: center; gap: 1rem; }
+.stat__icon {
+    width: 52px; height: 52px; border-radius: 14px; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--teal-050); color: var(--teal);
+}
+.stat__icon--gold { background: #fdf1d6; color: var(--gold-700); }
+.stat__icon--good { background: #e2f3ea; color: var(--good); }
+.stat__value { font-size: 1.9rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+.stat__label { color: var(--muted); font-size: .82rem; font-weight: 500; }
+
+/* ---------- Nav tabs (RBAC) ------------------------------------------ */
+.nav-tabs { border-bottom: 1px solid var(--line); gap: .25rem; }
+.nav-tabs .nav-link { border: 0; color: var(--muted); font-weight: 600; border-radius: 0; padding: .5rem .9rem; border-bottom: 2.5px solid transparent; }
+.nav-tabs .nav-link:hover { color: var(--ink); border-color: transparent; }
+.nav-tabs .nav-link.active { color: var(--teal); background: transparent; border-bottom-color: var(--teal); }
+
+/* ---------- Auth (login / registrasi) -------------------------------- */
+.auth-wrap { min-height: calc(100vh - 2rem); display: flex; align-items: center; justify-content: center; }
+.auth-card { width: 100%; max-width: 420px; }
+.auth-card.auth-card--wide { max-width: 680px; }
+.auth-hero {
+    text-align: center; margin-bottom: 1.5rem;
+}
+.auth-hero__ring { width: 68px; height: 68px; margin: 0 auto .8rem; display: block; }
+.auth-hero h1 { font-size: 1.5rem; margin-bottom: .2rem; }
+.auth-hero p { color: var(--muted); margin: 0; }
+
+/* ---------- Page header band ----------------------------------------- */
+.page-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.025em; }
+
+/* ---------- Misc ------------------------------------------------------ */
+.rounded-circle.border { border-color: var(--line) !important; }
+main.container { max-width: 1100px; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+}
