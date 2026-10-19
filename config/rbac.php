@@ -36,6 +36,7 @@ return [
     'routes' => [
         'rbac.*'           => ['admin'],              // pengelolaan RBAC: admin saja
         'metrics.*'        => ['admin'],              // pengelolaan metrik & benchmark: admin saja
+        'users.*'          => ['admin'],              // pengelolaan pengguna non-atlet: admin saja
         'athletes.destroy' => ['admin'],              // hanya admin boleh hapus atlet
         'athletes.index'   => ['admin', 'coach'],
         'athletes.create'  => ['admin', 'coach'],
@@ -60,6 +61,7 @@ return [
         ['label' => 'Atlet',        'route' => 'athletes.index', 'roles' => ['admin', 'coach']],
         ['label' => 'Head to Head', 'route' => 'h2h',            'roles' => ['admin', 'coach']],
         ['label' => 'Metrik & BM', 'route' => 'metrics.index',    'roles' => ['admin']],
+        ['label' => 'Pengguna',    'route' => 'users.index',      'roles' => ['admin']],
         ['label' => 'Akses (RBAC)', 'route' => 'rbac.roles.index', 'roles' => ['admin']],
         ['label' => 'Profil Saya',  'route' => 'athletes.show',  'roles' => ['athlete'], 'param' => 'self_athlete'],
         ['label' => 'Buku Saku',    'route' => 'shoot-log.edit', 'roles' => ['athlete'], 'param' => 'self_athlete'],

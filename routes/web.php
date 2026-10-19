@@ -11,6 +11,7 @@ use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoutePermissionController;
 use App\Http\Controllers\ShootLogController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -58,9 +59,11 @@ Route::middleware(['auth', 'rbac'])->group(function () {
 
     Route::get('/head-to-head', [HeadToHeadController::class, 'index'])->name('h2h');
 
-    // Pengelolaan metrik & benchmark (CRUD). Khusus admin (hard guard + izin RBAC 'metrics.*').
+    // Pengelolaan metrik/benchmark & pengguna non-atlet. Khusus admin
+    // (hard guard role:admin + izin RBAC 'metrics.*' / 'users.*').
     Route::middleware('role:admin')->group(function () {
         Route::resource('metrics', MetricController::class)->except(['show']);
+        Route::resource('users', UserController::class)->except(['show']);
     });
 
     /*
