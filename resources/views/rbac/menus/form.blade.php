@@ -7,7 +7,7 @@
     <form method="post" action="{{ $menu->exists ? route('rbac.menus.update', $menu) : route('rbac.menus.store') }}" class="row g-3">
         @csrf @if($menu->exists) @method('PUT') @endif
         <div class="col-md-5"><label class="form-label">Label</label><input name="label" value="{{ old('label', $menu->label) }}" class="form-control" required></div>
-        <div class="col-md-4"><label class="form-label">Route (nama)</label><input name="route" value="{{ old('route', $menu->route) }}" class="form-control" required placeholder="mis. dashboard"></div>
+        <div class="col-md-4"><label class="form-label">Route (nama)</label><input name="route" value="{{ old('route', $menu->route) }}" class="form-control" required placeholder="mis. dashboard.index"></div>
         <div class="col-md-3"><label class="form-label">Urutan</label><input type="number" name="sort" value="{{ old('sort', $menu->sort) }}" class="form-control"></div>
         <div class="col-md-4"><label class="form-label">Parameter</label>
             <select name="param" class="form-select"><option value="">(tanpa)</option><option value="self_athlete" @selected(old('param', $menu->param)=='self_athlete')>self_athlete (atlet sendiri)</option></select></div>

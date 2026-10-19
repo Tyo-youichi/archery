@@ -30,9 +30,11 @@ Route::middleware('guest')->group(function () {
  * sendiri) tetap dicek di controller.
  */
 Route::middleware(['auth', 'rbac'])->group(function () {
-    Route::get('/', fn () => redirect()->route('dashboard'));
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/', fn () => redirect()->route('dashboard.index'));
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    // Logout TIDAK melalui pengecekan RBAC: user yang sudah login harus selalu bisa
+    // keluar, apa pun isi tabel izin (mencegah terperangkap tanpa bisa logout).
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->withoutMiddleware('rbac');
 
     // Profil & Buku Saku: atlet untuk dirinya sendiri, staf untuk semua (dicek di controller).
     Route::get('/athletes/{athlete}', [AthleteController::class, 'show'])->name('athletes.show')->whereNumber('athlete');
@@ -58,7 +60,7 @@ Route::middleware(['auth', 'rbac'])->group(function () {
         Route::delete('/{id}', [RecordController::class, 'destroy'])->name('destroy')->whereNumber('id');
     });
 
-    Route::get('/head-to-head', [HeadToHeadController::class, 'index'])->name('h2h');
+    Route::get('/head-to-head', [HeadToHeadController::class, 'index'])->name('h2h.index');
 
     // Pengelolaan metrik/benchmark & pengguna non-atlet. Akses murni dari tabel RBAC
     // ('metrics.*' / 'users.*' => admin) — tanpa hard-guard.
@@ -72,6 +74,7 @@ Route::middleware(['auth', 'rbac'])->group(function () {
      * via CLI: php artisan db:seed --class=RbacSeeder.
      */
     Route::prefix('rbac')->name('rbac.')->group(function () {
+        Route::get('/', fn () => redirect()->route('rbac.roles.index'))->name('index');   // rbac.index → landing RBAC
         Route::resource('roles', RoleController::class)->except(['show']);
         Route::resource('permissions', RoutePermissionController::class)->except(['show'])
             ->parameters(['permissions' => 'permission']);

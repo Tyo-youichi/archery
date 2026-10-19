@@ -7,7 +7,7 @@
     <form method="post" action="{{ $permission->exists ? route('rbac.permissions.update', $permission) : route('rbac.permissions.store') }}" class="row g-3">
         @csrf @if($permission->exists) @method('PUT') @endif
         <div class="col-md-8"><label class="form-label">Pola route</label>
-            <input name="pattern" value="{{ old('pattern', $permission->pattern) }}" class="form-control" list="routeNames" required placeholder="mis. athletes.* atau h2h">
+            <input name="pattern" value="{{ old('pattern', $permission->pattern) }}" class="form-control" list="routeNames" required placeholder="mis. athletes.* atau dashboard.*">
             <datalist id="routeNames">@foreach($routeNames ?? [] as $n)<option value="{{ $n }}">@endforeach</datalist>
             <div class="form-text">Nama route Laravel; boleh wildcard <code>*</code>.</div></div>
         <div class="col-md-4"><label class="form-label">Urutan</label><input type="number" name="sort" value="{{ old('sort', $permission->sort) }}" class="form-control"></div>

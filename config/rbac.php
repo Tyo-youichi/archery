@@ -47,13 +47,13 @@ return [
         'athletes.update'  => ['admin', 'coach'],
         'equipment.*'      => ['admin', 'coach'],
         'records.*'        => ['admin', 'coach'],
-        'h2h'              => ['admin', 'coach'],
+        'h2h.*'            => ['admin', 'coach'],
 
         // Boleh semua user login (tanda '*'); kepemilikan data dicek di controller.
-        'dashboard'        => ['*'],
+        'dashboard.*'      => ['*'],
         'athletes.show'    => ['*'],
         'shoot-log.*'      => ['*'],
-        'logout'           => ['*'],
+        // (logout tidak di sini — route-nya pakai withoutMiddleware('rbac'), selalu boleh)
     ],
 
     /*
@@ -62,12 +62,12 @@ return [
     | Item dilewati bila route-nya tidak ada atau param tidak bisa di-resolve.
     */
     'menus' => [
-        ['label' => 'Dashboard',    'route' => 'dashboard',      'roles' => ['admin', 'coach', 'athlete']],
+        ['label' => 'Dashboard',    'route' => 'dashboard.index', 'roles' => ['admin', 'coach', 'athlete']],
         ['label' => 'Atlet',        'route' => 'athletes.index', 'roles' => ['admin', 'coach']],
-        ['label' => 'Head to Head', 'route' => 'h2h',            'roles' => ['admin', 'coach']],
+        ['label' => 'Head to Head', 'route' => 'h2h.index',      'roles' => ['admin', 'coach']],
         ['label' => 'Metrik & BM', 'route' => 'metrics.index',    'roles' => ['admin']],
         ['label' => 'Pengguna',    'route' => 'users.index',      'roles' => ['admin']],
-        ['label' => 'Akses (RBAC)', 'route' => 'rbac.roles.index', 'roles' => ['admin']],
+        ['label' => 'Akses (RBAC)', 'route' => 'rbac.index',      'roles' => ['admin']],
         ['label' => 'Profil Saya',  'route' => 'athletes.show',  'roles' => ['athlete'], 'param' => 'self_athlete'],
         ['label' => 'Buku Saku',    'route' => 'shoot-log.edit', 'roles' => ['athlete'], 'param' => 'self_athlete'],
     ],

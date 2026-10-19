@@ -15,7 +15,7 @@
 @auth
 <nav class="navbar navbar-expand-md app-navbar mb-4">
     <div class="container">
-        <a class="navbar-brand" href="{{ route('dashboard') }}">
+        <a class="navbar-brand" href="{{ route('dashboard.index') }}">
             @include('partials.brand-mark')
             <span>Archer<span class="brand-sub"> Monitor</span></span>
         </a>
