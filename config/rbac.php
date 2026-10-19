@@ -28,10 +28,12 @@ return [
     'staff' => ['admin', 'coach'],
 
     /*
-    | Izin per-ROUTE NAME. Key boleh memakai wildcard "*" (Str::is).
+    | Izin per-ROUTE NAME. Key boleh memakai wildcard "*" (Str::is) pada NAMA route.
     | Yang lebih spesifik diletakkan DI ATAS yang berpola, karena match pertama menang.
-    | Route yang TIDAK tercantum: boleh untuk semua user terautentikasi
-    | (kepemilikan data, mis. atlet lihat profil sendiri, dicek di controller).
+    | KEBIJAKAN: DENY-BY-DEFAULT — route yang TIDAK tercantum di sini akan DITOLAK.
+    | Tanda '*' pada daftar role = boleh untuk semua user login. Jadi SETIAP halaman
+    | baru wajib didaftarkan di sini (atau lewat UI RBAC) agar bisa diakses.
+    | Kepemilikan data (mis. atlet lihat profil sendiri) tetap dicek di controller.
     */
     'routes' => [
         'rbac.*'           => ['admin'],              // pengelolaan RBAC: admin saja
@@ -47,8 +49,11 @@ return [
         'records.*'        => ['admin', 'coach'],
         'h2h'              => ['admin', 'coach'],
 
-        // Tidak diatur (boleh semua role login, cek kepemilikan di controller):
-        //   dashboard, athletes.show, shoot-log.edit, shoot-log.update, logout
+        // Boleh semua user login (tanda '*'); kepemilikan data dicek di controller.
+        'dashboard'        => ['*'],
+        'athletes.show'    => ['*'],
+        'shoot-log.*'      => ['*'],
+        'logout'           => ['*'],
     ],
 
     /*

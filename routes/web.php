@@ -23,10 +23,11 @@ Route::middleware('guest')->group(function () {
 
 /*
  * Semua route di bawah ini terautentikasi DAN dilindungi RBAC berbasis route.
- * Middleware 'rbac' mengambil keputusan izin dari config/rbac.php berdasarkan
- * nama route — tidak perlu menandai role per route di sini.
- * Route yang tidak diatur di config boleh diakses semua user login; kepemilikan
- * data (atlet hanya datanya sendiri) tetap dicek di controller.
+ * Middleware 'rbac' mengambil keputusan izin dari TABEL RBAC (di-seed dari
+ * config/rbac.php) berdasarkan nama route. Kebijakan DENY-BY-DEFAULT: route yang
+ * tidak terdaftar di tabel izin akan DITOLAK — tidak ada hard-guard di sini,
+ * seluruh akses diatur dari tabel/UI RBAC. Kepemilikan data (atlet hanya datanya
+ * sendiri) tetap dicek di controller.
  */
 Route::middleware(['auth', 'rbac'])->group(function () {
     Route::get('/', fn () => redirect()->route('dashboard'));
@@ -59,19 +60,18 @@ Route::middleware(['auth', 'rbac'])->group(function () {
 
     Route::get('/head-to-head', [HeadToHeadController::class, 'index'])->name('h2h');
 
-    // Pengelolaan metrik/benchmark & pengguna non-atlet. Khusus admin
-    // (hard guard role:admin + izin RBAC 'metrics.*' / 'users.*').
-    Route::middleware('role:admin')->group(function () {
-        Route::resource('metrics', MetricController::class)->except(['show']);
-        Route::resource('users', UserController::class)->except(['show']);
-    });
+    // Pengelolaan metrik/benchmark & pengguna non-atlet. Akses murni dari tabel RBAC
+    // ('metrics.*' / 'users.*' => admin) — tanpa hard-guard.
+    Route::resource('metrics', MetricController::class)->except(['show']);
+    Route::resource('users', UserController::class)->except(['show']);
 
     /*
-     * Pengelolaan RBAC (CRUD roles, izin route, menu). Khusus admin.
-     * Hard guard 'role:admin' dipasang eksplisit agar aman walau data RBAC di DB
-     * belum di-seed (tidak bergantung pada config/DB route_permissions).
+     * Pengelolaan RBAC (CRUD roles, izin route, menu). Akses dari tabel RBAC
+     * ('rbac.*' => admin) — tanpa hard-guard. PENTING: pastikan baris 'rbac.*' selalu
+     * ada di tabel izin; jika terhapus, admin bisa terkunci dari halaman ini — pulihkan
+     * via CLI: php artisan db:seed --class=RbacSeeder.
      */
-    Route::middleware('role:admin')->prefix('rbac')->name('rbac.')->group(function () {
+    Route::prefix('rbac')->name('rbac.')->group(function () {
         Route::resource('roles', RoleController::class)->except(['show']);
         Route::resource('permissions', RoutePermissionController::class)->except(['show'])
             ->parameters(['permissions' => 'permission']);

@@ -105,17 +105,19 @@ class Rbac
 
     /**
      * Apakah $role boleh mengakses route $name (izin per-route).
-     * Route yang tidak diatur => boleh untuk semua user terautentikasi.
+     * Kebijakan DENY-BY-DEFAULT: route yang TIDAK terdaftar di tabel izin => DITOLAK.
+     * Tanda '*' pada daftar role = boleh untuk semua user terautentikasi.
+     * (Route tanpa nama tidak melewati pengecekan ini — lihat EnforceRoutePermission.)
      */
     public static function routeAllowed(string $name, ?string $role): bool
     {
         foreach (self::data()['routes'] as $pattern => $allowed) {
             if (Str::is($pattern, $name)) {
-                return in_array($role, $allowed, true);
+                return in_array('*', $allowed, true) || in_array($role, $allowed, true);
             }
         }
 
-        return true;
+        return false;   // deny-by-default
     }
 
     /**
