@@ -326,7 +326,7 @@ main.container { max-width: 1100px; }
 .app-sidebar__user form { flex: 1 1 100%; }
 
 .app-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
-.app-content { width: 100%; max-width: 1200px; margin: 0 auto; padding: 1.6rem 1.35rem 3rem; }
+.app-content { width: 100%; padding: 1.6rem 1.9rem 3rem; }
 .app-topbar { display: none; align-items: center; gap: .7rem; padding: .55rem .9rem; background: var(--teal); color: #fff; position: sticky; top: 0; z-index: 1020; }
 .app-topbar__brand { color: #fff; font-weight: 800; text-decoration: none; letter-spacing: -.02em; }
 .app-burger { background: transparent; border: 1px solid rgba(255,255,255,.4); color: #fff; border-radius: 8px; padding: .25rem .45rem; line-height: 0; cursor: pointer; }
