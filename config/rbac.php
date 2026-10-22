@@ -43,9 +43,11 @@ return [
         'athletes.index'   => ['admin', 'coach'],
         'athletes.create'  => ['admin', 'coach'],
         'athletes.store'   => ['admin', 'coach'],
-        'athletes.edit'    => ['admin', 'coach'],
-        'athletes.update'  => ['admin', 'coach'],
-        'equipment.*'      => ['admin', 'coach'],
+        // Atlet boleh edit BIODATA miliknya sendiri (kepemilikan + batasan field di controller).
+        'athletes.edit'    => ['admin', 'coach', 'athlete'],
+        'athletes.update'  => ['admin', 'coach', 'athlete'],
+        // Atlet boleh isi PERALATAN miliknya sendiri (kepemilikan dicek di controller).
+        'equipment.*'      => ['admin', 'coach', 'athlete'],
         'records.*'        => ['admin', 'coach'],
         'h2h.*'            => ['admin', 'coach'],
 
@@ -53,6 +55,7 @@ return [
         'dashboard.*'      => ['*'],
         'athletes.show'    => ['*'],
         'shoot-log.*'      => ['*'],
+        'beban.*'          => ['*'],   // printout beban: staf semua, atlet miliknya (cek di controller)
         // (logout tidak di sini — route-nya pakai withoutMiddleware('rbac'), selalu boleh)
     ],
 
@@ -70,5 +73,6 @@ return [
         ['label' => 'Akses (RBAC)', 'route' => 'rbac.index',      'roles' => ['admin']],
         ['label' => 'Profil Saya',  'route' => 'athletes.show',  'roles' => ['athlete'], 'param' => 'self_athlete'],
         ['label' => 'Buku Saku',    'route' => 'shoot-log.edit', 'roles' => ['athlete'], 'param' => 'self_athlete'],
+        ['label' => 'Peralatan Saya', 'route' => 'equipment.edit', 'roles' => ['athlete'], 'param' => 'self_athlete'],
     ],
 ];

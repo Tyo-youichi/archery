@@ -105,14 +105,36 @@ class AthleteController extends Controller
         ]);
     }
 
-    public function edit(Athlete $athlete) { return view('athletes.form', compact('athlete')); }
+    public function edit(Athlete $athlete)
+    {
+        $this->authorizeView($athlete);   // staf semua; atlet hanya miliknya
+
+        return view('athletes.form', compact('athlete'));
+    }
 
     public function update(Request $request, Athlete $athlete)
     {
-        $athlete->update($this->validated($request, $athlete));
+        $this->authorizeView($athlete);
+
+        // Staf boleh semua field; atlet hanya field personal miliknya (kode, divisi,
+        // jenis pendaftaran, status aktif tetap dikontrol staf).
+        $data = auth()->user()->isStaff() ? $this->validated($request, $athlete) : $this->validatedSelf($request);
+        $athlete->update($data);
         $this->handlePhoto($request, $athlete);
 
         return redirect()->route('athletes.show', $athlete)->with('ok', 'Biodata diperbarui.');
+    }
+
+    /** Field biodata yang boleh diubah atlet sendiri (tanpa kode/divisi/jenis pendaftaran/status). */
+    private function validatedSelf(Request $request): array
+    {
+        return $request->validate([
+            'name'        => 'required|string|max:255',
+            'birth_place' => 'nullable|string|max:100',
+            'birth_date'  => 'nullable|date|before:today',
+            'gender'      => 'nullable|in:L,P',
+            'origin'      => 'nullable|string|max:150',
+        ]);
     }
 
     public function destroy(Athlete $athlete)

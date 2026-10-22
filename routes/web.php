@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AthleteController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BebanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\HeadToHeadController;
@@ -51,6 +52,9 @@ Route::middleware(['auth', 'rbac'])->group(function () {
 
     Route::get('/athletes/{athlete}/equipment', [EquipmentController::class, 'edit'])->name('equipment.edit');
     Route::put('/athletes/{athlete}/equipment', [EquipmentController::class, 'update'])->name('equipment.update');
+
+    // Printout data beban (1RM) per atlet — ramah cetak / Simpan PDF.
+    Route::get('/athletes/{athlete}/beban/cetak', [BebanController::class, 'print'])->name('beban.print')->whereNumber('athlete');
 
     Route::prefix('/athletes/{athlete}/records/{type}')->name('records.')->group(function () {
         Route::get('/create', [RecordController::class, 'create'])->name('create');

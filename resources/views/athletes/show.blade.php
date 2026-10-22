@@ -22,11 +22,11 @@
     </div>
     <div class="d-flex gap-2">
         <a class="btn btn-success btn-sm" href="{{ route('shoot-log.edit', $athlete) }}">Buku Saku (100 arrow)</a>
-        @if($staff)
+        @if($staff || auth()->id() === $athlete->user_id)
             <a class="btn btn-outline-secondary btn-sm" href="{{ route('athletes.edit', $athlete) }}">Edit biodata</a>
-            @if(auth()->user()->hasRole('admin'))
-                <form method="post" action="{{ route('athletes.destroy', $athlete) }}" onsubmit="return confirm('Hapus atlet beserta seluruh datanya?')">@csrf @method('DELETE')<button class="btn btn-outline-danger btn-sm">Hapus</button></form>
-            @endif
+        @endif
+        @if($staff && auth()->user()->hasRole('admin'))
+            <form method="post" action="{{ route('athletes.destroy', $athlete) }}" onsubmit="return confirm('Hapus atlet beserta seluruh datanya?')">@csrf @method('DELETE')<button class="btn btn-outline-danger btn-sm">Hapus</button></form>
         @endif
     </div>
 </div>
@@ -147,7 +147,8 @@
     {{-- ================= Beban ================= --}}
     <div class="tab-pane fade" id="tab-beban">
         <div class="card"><div class="card-body">
-            <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Data Beban (1RM terbaru per latihan)</h2>{!! $add('load', '+ Data beban') !!}</div>
+            <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Data Beban (1RM terbaru per latihan)</h2>
+                <div class="d-flex gap-2">{!! $add('load', '+ Data beban') !!}<a class="btn btn-sm btn-outline-secondary" href="{{ route('beban.print', $athlete) }}" target="_blank">Cetak</a></div></div>
             @if($loads->count())<canvas id="loadBar" height="80" class="mb-3"></canvas>@endif
             <div class="table-responsive"><table class="table table-compact mb-0">
                 <thead><tr><th>Latihan</th><th>Tanggal</th><th class="text-end">Beban (kg)</th><th class="text-end">Reps</th><th class="text-end">1RM (kg)</th>@if($staff)<th></th>@endif</tr></thead>
@@ -181,7 +182,7 @@
     {{-- ================= Peralatan ================= --}}
     <div class="tab-pane fade" id="tab-alat">
         <div class="card"><div class="card-body">
-            <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Peralatan</h2>@if($staff)<a class="btn btn-sm btn-outline-primary" href="{{ route('equipment.edit', $athlete) }}">Edit peralatan</a>@endif</div>
+            <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Peralatan</h2>@if($staff || auth()->id() === $athlete->user_id)<a class="btn btn-sm btn-outline-primary" href="{{ route('equipment.edit', $athlete) }}">Edit peralatan</a>@endif</div>
             <div class="row g-2">
                 @foreach(config('archery.equipment_fields') as $k => $label)
                     <div class="col-6 col-md-3"><div class="small text-muted">{{ $label }}</div><div>{{ $athlete->equipment->{$k} ?? '-' }}</div></div>
