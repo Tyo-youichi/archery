@@ -39,8 +39,15 @@
                 <div class="form-text">JPG/PNG/WEBP; otomatis dikompres ke WEBP (maks sisi 1600px, 3 MB).</div>
                 <div id="proofPreview" class="mt-2"></div>
             </div>
+            @php $amt = old('amount', $fee ?: ''); @endphp
             <div class="col-md-6"><label class="form-label">Jumlah dibayar (opsional)</label>
-                <input type="number" name="amount" value="{{ old('amount', $fee ?: null) }}" step="any" min="0" class="form-control"></div>
+                <div class="input-group">
+                    <span class="input-group-text">Rp</span>
+                    <input type="text" inputmode="numeric" id="amountDisplay" class="form-control" placeholder="0"
+                           value="{{ $amt !== '' ? number_format((int) $amt, 0, ',', '.') : '' }}">
+                </div>
+                <input type="hidden" name="amount" id="amountRaw" value="{{ $amt }}">
+            </div>
             <div class="col-12"><label class="form-label">Catatan (opsional)</label>
                 <input name="note" value="{{ old('note') }}" class="form-control" placeholder="mis. transfer BCA a.n. ..."></div>
             <div class="col-12"><button class="btn btn-primary" id="submitBtn" disabled>Kirim bukti</button></div>
@@ -58,7 +65,7 @@
                     <td>{{ $p->period_label }}</td>
                     <td>{{ $p->amount ? $rupiah($p->amount) : '-' }}</td>
                     <td><span class="badge {{ $badge[$p->status] }}">{{ $statusLabel[$p->status] }}</span></td>
-                    <td>@if($p->proof)<a href="{{ route('payment.proof', $p) }}" target="_blank">Lihat</a>@else-@endif</td>
+                    <td>@if($p->proof)<a href="#" data-src="{{ route('payment.proof', $p) }}" data-bs-toggle="modal" data-bs-target="#proofModal">Lihat</a>@else-@endif</td>
                 </tr>
             @empty<tr><td colspan="4" class="text-muted">Belum ada pembayaran.</td></tr>@endforelse
             </tbody>
@@ -66,8 +73,29 @@
     </div></div></div>
 </div>
 
+{{-- Modal lihat bukti --}}
+<div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Bukti Pembayaran</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button></div>
+        <div class="modal-body text-center"><img id="proofModalImg" src="" alt="Bukti pembayaran" class="img-fluid rounded" style="max-height:72vh"></div>
+    </div></div>
+</div>
+
 @push('scripts')
 <script>
+// Modal bukti: set src gambar saat dibuka
+(function () {
+    const modal = document.getElementById('proofModal'), img = document.getElementById('proofModalImg');
+    if (modal) modal.addEventListener('show.bs.modal', e => { img.src = e.relatedTarget ? e.relatedTarget.getAttribute('data-src') : ''; });
+    modal && modal.addEventListener('hidden.bs.modal', () => { img.src = ''; });
+})();
+// Format nominal: tampilan ribuan "Rp", kirim angka mentah di input hidden
+(function () {
+    const disp = document.getElementById('amountDisplay'), raw = document.getElementById('amountRaw');
+    if (!disp || !raw) return;
+    const group = d => d.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    disp.addEventListener('input', () => { const d = disp.value.replace(/\D/g, ''); raw.value = d; disp.value = group(d); });
+})();
 (function () {
     const MAX = 1600, QUALITY = 0.85;
     const file = document.getElementById('proofFile');

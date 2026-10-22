@@ -27,7 +27,7 @@
             <td><span class="badge {{ $badge[$p->status] }}">{{ $statusLabel[$p->status] }}</span>
                 @if($p->status === 'rejected' && $p->note)<div class="small text-danger">{{ $p->note }}</div>@endif</td>
             <td class="small text-muted">{{ $p->updated_at->format('d/m/Y H:i') }}</td>
-            <td>@if($p->proof)<a href="{{ route('payment.proof', $p) }}" target="_blank">Lihat</a>@else<span class="text-muted">-</span>@endif</td>
+            <td>@if($p->proof)<a href="#" data-src="{{ route('payment.proof', $p) }}" data-bs-toggle="modal" data-bs-target="#proofModal">Lihat</a>@else<span class="text-muted">-</span>@endif</td>
             <td class="text-end text-nowrap">
                 @if($p->status !== 'verified')
                     <form method="post" action="{{ route('payment.verify', $p) }}" class="d-inline">@csrf @method('PUT')<button class="btn btn-sm btn-success">Verifikasi</button></form>
@@ -42,4 +42,23 @@
 </table></div></div>
 
 <div class="mt-3">{{ $payments->links() }}</div>
+
+{{-- Modal lihat bukti --}}
+<div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Bukti Pembayaran</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button></div>
+        <div class="modal-body text-center"><img id="proofModalImg" src="" alt="Bukti pembayaran" class="img-fluid rounded" style="max-height:72vh"></div>
+    </div></div>
+</div>
+
+@push('scripts')
+<script>
+(function () {
+    const modal = document.getElementById('proofModal'), img = document.getElementById('proofModalImg');
+    if (!modal) return;
+    modal.addEventListener('show.bs.modal', e => { img.src = e.relatedTarget ? e.relatedTarget.getAttribute('data-src') : ''; });
+    modal.addEventListener('hidden.bs.modal', () => { img.src = ''; });
+})();
+</script>
+@endpush
 @endsection
