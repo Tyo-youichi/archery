@@ -8,6 +8,7 @@ use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\HeadToHeadController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MetricController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoutePermissionController;
@@ -30,7 +31,7 @@ Route::middleware('guest')->group(function () {
  * seluruh akses diatur dari tabel/UI RBAC. Kepemilikan data (atlet hanya datanya
  * sendiri) tetap dicek di controller.
  */
-Route::middleware(['auth', 'rbac'])->group(function () {
+Route::middleware(['auth', 'rbac', 'payment'])->group(function () {
     Route::get('/', fn () => redirect()->route('dashboard.index'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     // Logout TIDAK melalui pengecekan RBAC: user yang sudah login harus selalu bisa
@@ -55,6 +56,14 @@ Route::middleware(['auth', 'rbac'])->group(function () {
 
     // Printout data beban (1RM) per atlet — ramah cetak / Simpan PDF.
     Route::get('/athletes/{athlete}/beban/cetak', [BebanController::class, 'print'])->name('beban.print')->whereNumber('athlete');
+
+    // Pembayaran iuran. Atlet: unggah bukti periode berjalan. Admin: verifikasi/tolak.
+    Route::get('/pembayaran/saya', [PaymentController::class, 'my'])->name('payment.my');
+    Route::post('/pembayaran/saya', [PaymentController::class, 'upload'])->name('payment.upload');
+    Route::get('/pembayaran/{payment}/bukti', [PaymentController::class, 'proof'])->name('payment.proof')->whereNumber('payment');
+    Route::get('/pembayaran', [PaymentController::class, 'index'])->name('payment.index');
+    Route::put('/pembayaran/{payment}/verifikasi', [PaymentController::class, 'verify'])->name('payment.verify')->whereNumber('payment');
+    Route::put('/pembayaran/{payment}/tolak', [PaymentController::class, 'reject'])->name('payment.reject')->whereNumber('payment');
 
     Route::prefix('/athletes/{athlete}/records/{type}')->name('records.')->group(function () {
         Route::get('/create', [RecordController::class, 'create'])->name('create');

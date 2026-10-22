@@ -39,6 +39,9 @@ return [
         'rbac.*'           => ['admin'],              // pengelolaan RBAC: admin saja
         'metrics.*'        => ['admin'],              // pengelolaan metrik & benchmark: admin saja
         'users.*'          => ['admin'],              // pengelolaan pengguna non-atlet: admin saja
+        'payment.index'    => ['admin'],              // verifikasi pembayaran: admin
+        'payment.verify'   => ['admin'],
+        'payment.reject'   => ['admin'],
         'athletes.destroy' => ['admin'],              // hanya admin boleh hapus atlet
         'athletes.index'   => ['admin', 'coach'],
         'athletes.create'  => ['admin', 'coach'],
@@ -56,6 +59,9 @@ return [
         'athletes.show'    => ['*'],
         'shoot-log.*'      => ['*'],
         'beban.*'          => ['*'],   // printout beban: staf semua, atlet miliknya (cek di controller)
+        'payment.my'       => ['athlete'],   // halaman unggah bukti (atlet)
+        'payment.upload'   => ['athlete'],
+        'payment.proof'    => ['*'],          // lihat bukti: pemilik / staf (cek di controller)
         // (logout tidak di sini — route-nya pakai withoutMiddleware('rbac'), selalu boleh)
     ],
 
@@ -70,9 +76,11 @@ return [
         ['label' => 'Head to Head', 'route' => 'h2h.index',      'roles' => ['admin', 'coach']],
         ['label' => 'Metrik & BM', 'route' => 'metrics.index',    'roles' => ['admin']],
         ['label' => 'Pengguna',    'route' => 'users.index',      'roles' => ['admin']],
+        ['label' => 'Pembayaran',  'route' => 'payment.index',    'roles' => ['admin']],
         ['label' => 'Akses (RBAC)', 'route' => 'rbac.index',      'roles' => ['admin']],
         ['label' => 'Profil Saya',  'route' => 'athletes.show',  'roles' => ['athlete'], 'param' => 'self_athlete'],
         ['label' => 'Buku Saku',    'route' => 'shoot-log.edit', 'roles' => ['athlete'], 'param' => 'self_athlete'],
         ['label' => 'Peralatan Saya', 'route' => 'equipment.edit', 'roles' => ['athlete'], 'param' => 'self_athlete'],
+        ['label' => 'Pembayaran',   'route' => 'payment.my',     'roles' => ['athlete']],
     ],
 ];

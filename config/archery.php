@@ -32,6 +32,9 @@ return [
 
     // Cache snapshot definisi metrik dari DB (App\Support\Metrics). Set false saat debugging.
     'metrics_cache' => true,
+
+    // Iuran bulanan (Rupiah) yang ditampilkan di halaman pembayaran atlet. Sesuaikan.
+    'monthly_fee' => 150000,
     'divisions' => ['Recurve', 'Compound', 'Barebow', 'Nasional'],
     'registration_types' => [
         'reguler'  => 'Reguler',
@@ -56,7 +59,7 @@ return [
     ],
 
     // Buku Saku Atlet - Tabel Monitor Shoot 100 Arrow
-    'shoot_days' => ['Sn' => 'Senin', 'Sl' => 'Selasa', 'Rb' => 'Rabu', 'Km' => 'Kamis', 'Jm' => 'Jumat', 'Sb' => 'Sabtu'],
+    'shoot_days' => ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],   // urut Senin→Sabtu (index = offset dari awal minggu)
     'technique_codes' => [
         'a' => 'Grip/Pegangan',
         'b' => 'Set-up',

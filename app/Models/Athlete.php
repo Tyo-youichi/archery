@@ -29,6 +29,7 @@ class Athlete extends Model
     public function monthlyScores() { return $this->hasMany(MonthlyScore::class)->orderBy('year')->orderBy('month'); }
     public function equipment() { return $this->hasOne(Equipment::class); }
     public function shootLogs() { return $this->hasMany(ShootLog::class)->orderBy('log_date'); }
+    public function payments() { return $this->hasMany(Payment::class)->orderByDesc('year')->orderByDesc('month'); }
 
     public function getAgeAttribute(): ?int
     {

@@ -42,6 +42,7 @@
 @endauth
 <main class="container pb-5">
     @if(session('ok'))<div class="alert alert-success">{{ session('ok') }}</div>@endif
+    @if(session('warn'))<div class="alert alert-warning">{{ session('warn') }}</div>@endif
     @if($errors->any())
         <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
     @endif

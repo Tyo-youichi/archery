@@ -6,6 +6,7 @@ use App\Models\Anthropometry;
 use App\Models\Athlete;
 use App\Models\LoadTest;
 use App\Models\MonthlyScore;
+use App\Models\Payment;
 use App\Models\PhysicalTest;
 use App\Models\ShootLog;
 use App\Models\TechniqueTest;
@@ -115,6 +116,18 @@ class DemoSeeder extends Seeder
                      'shot_100' => $i % 2 === 0]
                 );
             }
+
+            // Pembayaran periode berjalan: atlet tertaut (akun demo) = verified agar bisa
+            // login & akses; atlet lain = pending untuk mengisi antrean verifikasi admin.
+            $pNow = now();
+            Payment::updateOrCreate(
+                ['athlete_id' => $athlete->id, 'year' => $pNow->year, 'month' => $pNow->month],
+                [
+                    'amount'      => config('archery.monthly_fee'),
+                    'status'      => $d['link'] ? 'verified' : 'pending',
+                    'verified_at' => $d['link'] ? $pNow : null,
+                ]
+            );
         }
     }
 
