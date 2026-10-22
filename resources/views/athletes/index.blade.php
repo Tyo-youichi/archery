@@ -8,7 +8,7 @@
 <form class="row g-2 mb-3" method="get">
     <div class="col-md-5"><input name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari nama / kode"></div>
     <div class="col-md-3"><select name="division" class="form-select"><option value="">Semua divisi</option>@foreach(config('archery.divisions') as $d)<option @selected(request('division')==$d)>{{ $d }}</option>@endforeach</select></div>
-    <div class="col-md-2"><button class="btn btn-outline-secondary w-100">Cari</button></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Cari</button></div>
 </form>
 <div class="card"><div class="table-responsive"><table class="table table-compact table-hover mb-0 align-middle">
     <thead><tr><th>Kode</th><th>Nama</th><th>JK</th><th>Usia</th><th>Divisi</th><th>Pendaftaran</th><th>Status</th></tr></thead>
