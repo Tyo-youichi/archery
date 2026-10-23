@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AthleteController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BebanController;
@@ -38,6 +39,9 @@ Route::middleware(['auth', 'rbac', 'payment'])->group(function () {
     // keluar, apa pun isi tabel izin (mencegah terperangkap tanpa bisa logout).
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->withoutMiddleware('rbac');
 
+    // Self-service akun login (email/telepon/kata sandi sendiri). Boleh semua user login.
+    Route::put('/akun', [AccountController::class, 'update'])->name('account.update');
+
     // Profil & Buku Saku: atlet untuk dirinya sendiri, staf untuk semua (dicek di controller).
     Route::get('/athletes/{athlete}', [AthleteController::class, 'show'])->name('athletes.show')->whereNumber('athlete');
     Route::get('/athletes/{athlete}/shoot-log', [ShootLogController::class, 'edit'])->name('shoot-log.edit');
@@ -75,9 +79,11 @@ Route::middleware(['auth', 'rbac', 'payment'])->group(function () {
 
     Route::get('/head-to-head', [HeadToHeadController::class, 'index'])->name('h2h.index');
 
-    // Pengelolaan metrik/benchmark & pengguna non-atlet. Akses murni dari tabel RBAC
+    // Pengelolaan metrik/benchmark & pengguna. Akses murni dari tabel RBAC
     // ('metrics.*' / 'users.*' => admin) — tanpa hard-guard.
     Route::resource('metrics', MetricController::class)->except(['show']);
+    // Aktif/nonaktif akun (atlet keluar klub, dsb). Didaftarkan sebelum resource agar eksplisit.
+    Route::put('/users/{user}/aktif', [UserController::class, 'toggleActive'])->name('users.toggle')->whereNumber('user');
     Route::resource('users', UserController::class)->except(['show']);
 
     /*

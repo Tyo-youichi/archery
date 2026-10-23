@@ -20,6 +20,14 @@ class AuthController extends Controller
         if (! Auth::attempt($cred, $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'Email atau password salah.'])->onlyInput('email');
         }
+
+        // Akun nonaktif (mis. atlet sudah keluar dari klub) tidak boleh masuk.
+        if (! Auth::user()->is_active) {
+            Auth::logout();
+
+            return back()->withErrors(['email' => 'Akun Anda dinonaktifkan. Hubungi admin klub.'])->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard.index'));

@@ -1,7 +1,10 @@
 @extends('layouts.app')
 @section('title', $athlete->exists ? 'Edit Atlet' : 'Atlet Baru')
 @section('content')
-@php $isStaff = auth()->user()->isStaff(); @endphp
+@php
+    $isStaff = auth()->user()->isStaff();
+    $isOwner = $athlete->exists && auth()->id() === $athlete->user_id;
+@endphp
 <div class="card"><div class="card-body">
     <h1 class="h4 mb-3">{{ $athlete->exists ? 'Edit biodata' : 'Atlet baru' }}</h1>
     <form method="post" action="{{ $athlete->exists ? route('athletes.update', $athlete) : route('athletes.store') }}" class="row g-3">
@@ -40,6 +43,27 @@
         <div class="col-12"><button class="btn btn-primary">Simpan</button> <a class="btn btn-link" href="{{ $athlete->exists ? route('athletes.show',$athlete) : route('athletes.index') }}">Batal</a></div>
     </form>
 </div></div>
+
+@if($isOwner)
+{{-- Panel akun login milik atlet sendiri (email / telepon / kata sandi). --}}
+<div class="card mt-3"><div class="card-body">
+    <h2 class="h5 mb-1">Akun login</h2>
+    <p class="text-muted small mb-3">Email dan kata sandi yang Anda pakai untuk masuk ke aplikasi.</p>
+    <form method="post" action="{{ route('account.update') }}" class="row g-3" style="max-width:640px">
+        @csrf @method('PUT')
+        <div class="col-md-7"><label class="form-label">Email</label>
+            <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" class="form-control" required></div>
+        <div class="col-md-5"><label class="form-label">Telepon</label>
+            <input name="phone" value="{{ old('phone', auth()->user()->phone) }}" class="form-control" placeholder="opsional"></div>
+        <div class="col-md-6"><label class="form-label">Kata sandi baru</label>
+            <input type="password" name="password" class="form-control" autocomplete="new-password">
+            <div class="form-text">Kosongkan bila tidak ingin mengubah.</div></div>
+        <div class="col-md-6"><label class="form-label">Ulangi kata sandi</label>
+            <input type="password" name="password_confirmation" class="form-control" autocomplete="new-password"></div>
+        <div class="col-12"><button class="btn btn-outline-primary">Simpan akun</button></div>
+    </form>
+</div></div>
+@endif
 
 @push('scripts')
 <script>

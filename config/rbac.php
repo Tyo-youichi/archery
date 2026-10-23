@@ -38,7 +38,7 @@ return [
     'routes' => [
         'rbac.*'           => ['admin'],              // pengelolaan RBAC: admin saja
         'metrics.*'        => ['admin'],              // pengelolaan metrik & benchmark: admin saja
-        'users.*'          => ['admin'],              // pengelolaan pengguna non-atlet: admin saja
+        'users.*'          => ['admin'],              // pengelolaan pengguna (termasuk aktif/nonaktif): admin saja
         'payment.index'    => ['admin'],              // verifikasi pembayaran: admin
         'payment.verify'   => ['admin'],
         'payment.reject'   => ['admin'],
@@ -56,6 +56,7 @@ return [
 
         // Boleh semua user login (tanda '*'); kepemilikan data dicek di controller.
         'dashboard.*'      => ['*'],
+        'account.*'        => ['*'],   // ubah akun login sendiri (email/telepon/kata sandi)
         'athletes.show'    => ['*'],
         'shoot-log.*'      => ['*'],
         'beban.*'          => ['*'],   // printout beban: staf semua, atlet miliknya (cek di controller)
