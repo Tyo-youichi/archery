@@ -11,6 +11,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MetricController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoutePermissionController;
 use App\Http\Controllers\ShootLogController;
@@ -78,6 +79,9 @@ Route::middleware(['auth', 'rbac', 'payment'])->group(function () {
     });
 
     Route::get('/head-to-head', [HeadToHeadController::class, 'index'])->name('h2h.index');
+
+    // Laporan rekap lintas-atlet (fisik/teknik/skor/peralatan/beban). Admin & coach.
+    Route::get('/laporan/{type?}', [ReportController::class, 'index'])->name('reports.index');
 
     // Pengelolaan metrik/benchmark & pengguna. Akses murni dari tabel RBAC
     // ('metrics.*' / 'users.*' => admin) — tanpa hard-guard.
