@@ -70,8 +70,9 @@
     @if($athletes->isEmpty())
         <p class="text-muted mb-0 p-2">Belum ada atlet{{ $showingAll ? '' : ' aktif' }}.</p>
     @else
+        @php $partials = ['fisik' => 'physical', 'teknik' => 'technique', 'skor' => 'score', 'peralatan' => 'equipment', 'beban' => 'load']; @endphp
         <div class="report-scroll">
-            @include('reports.' . $type)
+            @include('reports.' . ($partials[$type] ?? $type))
         </div>
     @endif
 </div></div>
