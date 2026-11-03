@@ -12,10 +12,24 @@ use Illuminate\Http\Request;
  * config/archery.php; khusus 'physical' & 'technique' field metriknya DINAMIS,
  * diambil dari tabel `metrics` (App\Support\Metrics) dan disimpan ke kolom JSON
  * `results`: { "<key>": { "result": x, "bm": <snapshot> } }.
+ *
+ * Tiap metrik dirender sebagai SATU blok (nilai + override BM menyatu). Metrik
+ * berpasangan kanan/kiri (key berakhiran _right/_left) ditata sejajar di form.
+ *
+ * Sebagian metrik fisik direkam BEBERAPA PERCOBAAN (mis. Grip Strength 7x,
+ * lihat config('archery.physical_attempts')). Untuk metrik itu tiap percobaan
+ * disimpan di results."<key>".attempts[], dan "result" = nilai TERTINGGI (yang
+ * dipakai untuk benchmark/profil/laporan).
  */
 class RecordController extends Controller
 {
     private const METRIC_TYPES = ['physical', 'technique'];
+
+    /** Metrik multi-percobaan (key => jumlah percobaan). Hanya berlaku untuk tes fisik. */
+    private function attempts(string $type): array
+    {
+        return $type === 'physical' ? (array) config('archery.physical_attempts', []) : [];
+    }
 
     private function def(string $type): array
     {
@@ -30,15 +44,23 @@ class RecordController extends Controller
         return $def;
     }
 
-    /** Field input untuk tiap metrik aktif: nilai + override BM. */
+    /**
+     * Satu field "metric" per metrik (nilai + BM menyatu). 'attempts' > 0 =>
+     * nilai direkam beberapa percobaan; 'side' => right/left untuk tata letak sejajar.
+     */
     private function metricFields(string $domain): array
     {
+        $attempts = $this->attempts($domain);
         $fields = [];
         foreach (Metrics::metrics($domain) as $key => $m) {
             $unit = $m['unit'] ? ' (' . $m['unit'] . ')' : '';
-            $step = $m['step'] ?: '0.01';
-            $fields[$key] = ['label' => $m['label'] . $unit, 'type' => 'number', 'step' => $step, 'rules' => 'nullable|numeric|min:0'];
-            $fields[$key . '_bm'] = ['label' => 'BM ' . $m['label'] . ' (kosongkan = default)', 'type' => 'number', 'step' => $step, 'rules' => 'nullable|numeric|min:0'];
+            $fields[$key] = [
+                'label'    => $m['label'] . $unit,
+                'type'     => 'metric',
+                'attempts' => (int) ($attempts[$key] ?? 0),
+                'step'     => $m['step'] ?: '0.01',
+                'side'     => str_ends_with($key, '_right') ? 'right' : (str_ends_with($key, '_left') ? 'left' : null),
+            ];
         }
 
         return $fields;
@@ -46,7 +68,24 @@ class RecordController extends Controller
 
     private function rules(array $def): array
     {
-        return collect($def['fields'])->map(fn ($f) => $f['rules'])->all();
+        $rules = [];
+        foreach ($def['fields'] as $name => $f) {
+            if (($f['type'] ?? '') === 'metric') {
+                if (($f['attempts'] ?? 0) > 0) {
+                    for ($i = 1; $i <= $f['attempts']; $i++) {
+                        $rules[$name . '_a' . $i] = 'nullable|numeric|min:0';
+                    }
+                } else {
+                    $rules[$name] = 'nullable|numeric|min:0';
+                }
+                $rules[$name . '_bm'] = 'nullable|numeric|min:0';
+
+                continue;
+            }
+            $rules[$name] = $f['rules'];
+        }
+
+        return $rules;
     }
 
     /** Pindahkan field metrik dari input datar ke struktur JSON results (snapshot BM). */
@@ -56,21 +95,41 @@ class RecordController extends Controller
             return $data;
         }
 
+        $attempts = $this->attempts($type);
         $results = $base;   // pertahankan metrik lama (mis. yang sudah dinonaktifkan) saat edit
         foreach (Metrics::metrics($type) as $key => $m) {
-            $result = $data[$key] ?? null;
             $bm = $data[$key . '_bm'] ?? null;
-            unset($data[$key], $data[$key . '_bm']);
+            unset($data[$key . '_bm']);
 
             // Snapshot BM: pakai override bila diisi, selain itu default metrik per gender.
             if ($bm === null || $bm === '') {
                 $bm = $m['bm'][$athlete->gender] ?? $m['bm']['L'] ?? null;
             }
+            $bm = $bm === null ? null : (float) $bm;
 
-            $results[$key] = [
-                'result' => ($result === null || $result === '') ? null : (float) $result,
-                'bm'     => $bm === null ? null : (float) $bm,
-            ];
+            if (isset($attempts[$key])) {
+                // Kumpulkan percobaan terisi; hasil = nilai tertinggi.
+                $vals = [];
+                for ($i = 1; $i <= (int) $attempts[$key]; $i++) {
+                    $v = $data[$key . '_a' . $i] ?? null;
+                    unset($data[$key . '_a' . $i]);
+                    if ($v !== null && $v !== '') {
+                        $vals[] = (float) $v;
+                    }
+                }
+                $results[$key] = [
+                    'result'   => $vals ? max($vals) : null,
+                    'bm'       => $bm,
+                    'attempts' => $vals,
+                ];
+            } else {
+                $result = $data[$key] ?? null;
+                unset($data[$key]);
+                $results[$key] = [
+                    'result' => ($result === null || $result === '') ? null : (float) $result,
+                    'bm'     => $bm,
+                ];
+            }
         }
         $data['results'] = $results;
 
@@ -84,9 +143,20 @@ class RecordController extends Controller
             return [];
         }
 
+        $attempts = $this->attempts($type);
         $vals = [];
         foreach (($record->results ?? []) as $key => $cell) {
-            $vals[$key] = $cell['result'] ?? null;
+            if (isset($attempts[$key])) {
+                // Isi kotak percobaan dari attempts; fallback: hasil lama masuk ke percobaan ke-1.
+                $arr = (isset($cell['attempts']) && is_array($cell['attempts']))
+                    ? array_values($cell['attempts'])
+                    : (($cell['result'] ?? null) !== null ? [$cell['result']] : []);
+                foreach ($arr as $i => $v) {
+                    $vals[$key . '_a' . ($i + 1)] = $v;
+                }
+            } else {
+                $vals[$key] = $cell['result'] ?? null;
+            }
             $vals[$key . '_bm'] = $cell['bm'] ?? null;
         }
 

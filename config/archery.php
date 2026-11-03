@@ -49,6 +49,19 @@ return [
     'physical_groups'  => ['endurance' => 'Endurance', 'balance' => 'Balance', 'strength' => 'Strength'],
     'technique_groups' => ['scoring' => 'Scoring', 'specific_strength' => 'Specific Strength', 'specific_speed' => 'Specific Speed'],
 
+    /*
+     | Metrik tes FISIK yang direkam beberapa percobaan (key metrik => jumlah percobaan).
+     | Di form input tiap percobaan punya kotak sendiri (1..N); nilai yang disimpan sebagai
+     | hasil (dipakai benchmark/profil/laporan) = yang TERTINGGI, percobaan lain ikut disimpan.
+     | Mengikuti form kertas "Form Tes Fisik" (Grip Strength 7x kanan & kiri).
+     | Catatan: key harus sama dengan key metrik di tabel `metrics`. Bila metrik grip di-rename
+     | lewat menu Metrik & BM, sesuaikan key di sini.
+     */
+    'physical_attempts' => [
+        'grip_right' => 7,
+        'grip_left'  => 7,
+    ],
+
     // Rumus Excel: 1RM = beban x (1 + 0.0333 x reps)
     'one_rm_factor' => 0.0333,
 
