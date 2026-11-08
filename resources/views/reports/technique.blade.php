@@ -11,10 +11,10 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($athletes as $i => $a)
+        @foreach($athletes as $a)
             @php $t = $a->techniqueTests->first(); @endphp
             <tr>
-                <td class="num">{{ $i + 1 }}</td>
+                <td class="num">{{ $athletes->firstItem() + $loop->index }}</td>
                 <td>{{ $a->code }}</td>
                 <td class="name">{{ $a->name }}</td>
                 @forelse($metricDefs as $key => $m)

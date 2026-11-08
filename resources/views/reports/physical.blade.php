@@ -18,10 +18,10 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($athletes as $i => $a)
+        @foreach($athletes as $a)
             @php $an = $a->anthropometries->first(); $t = $a->physicalTests->first(); @endphp
             <tr>
-                <td class="num">{{ $i + 1 }}</td>
+                <td class="num">{{ $athletes->firstItem() + $loop->index }}</td>
                 <td>{{ $a->code }}</td>
                 <td class="name">{{ $a->name }}</td>
                 @foreach(array_keys($hrCols) as $f)<td class="num">{{ $fmt($an?->$f) }}</td>@endforeach

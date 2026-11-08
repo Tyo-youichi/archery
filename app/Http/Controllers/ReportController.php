@@ -25,14 +25,21 @@ class ReportController extends Controller
         'beban'     => 'Data Beban Max (1RM)',
     ];
 
+    /** Pilihan jumlah baris per halaman. 'all' = tanpa paginasi (untuk cetak). */
+    private const PER_PAGE = ['25', '50', 'all'];
+
     public function index(Request $request, string $type = 'fisik')
     {
         abort_unless(in_array($type, self::TYPES, true), 404);
 
+        $per     = in_array($request->input('per'), self::PER_PAGE, true) ? $request->input('per') : '25';
+        $perPage = $per === 'all' ? 100000 : (int) $per;
+
         $athletes = Athlete::query()
             ->when(! $request->boolean('all'), fn ($q) => $q->where('is_active', true))
             ->orderBy('name')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         $data = match ($type) {
             'fisik'     => $this->physical($athletes),
@@ -49,6 +56,8 @@ class ReportController extends Controller
             'title'      => self::TITLES[$type],
             'athletes'   => $athletes,
             'showingAll' => $request->boolean('all'),
+            'per'        => $per,
+            'perPages'   => self::PER_PAGE,
         ], $data));
     }
 
