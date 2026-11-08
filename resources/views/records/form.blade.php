@@ -48,7 +48,15 @@
                     @if($ftype === 'textarea')
                         <textarea name="{{ $name }}" rows="3" class="form-control">{{ $val }}</textarea>
                     @elseif($ftype === 'select')
-                        <select name="{{ $name }}" class="form-select">@foreach(config('archery.'.$f['options']) as $o)<option @selected($val == $o)>{{ $o }}</option>@endforeach</select>
+                        @php $opts = config('archery.' . $f['options']); $isList = array_is_list($opts); @endphp
+                        {{-- List (mis. load_exercises) -> value = label; assoc (mis. months) -> value = key, teks = nama --}}
+                        <select name="{{ $name }}" class="form-select">
+                            <option value="">– pilih –</option>
+                            @foreach($opts as $k => $label)
+                                @php $ov = $isList ? $label : $k; @endphp
+                                <option value="{{ $ov }}" @selected((string) $val === (string) $ov)>{{ $label }}</option>
+                            @endforeach
+                        </select>
                     @else
                         <input type="{{ $ftype }}" name="{{ $name }}" value="{{ $val }}" class="form-control" @if(isset($f['step']))step="{{ $f['step'] }}"@endif @if(isset($f['rules']) && str_contains($f['rules'], 'required'))required @endif>
                     @endif

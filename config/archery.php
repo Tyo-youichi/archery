@@ -42,6 +42,12 @@ return [
         'terapi'   => 'Terapi ABK',
     ],
 
+    // Nama bulan (key = angka 1-12 yang disimpan; dipakai dropdown form Skor Bulanan).
+    'months' => [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
+        7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+    ],
+
     'physical_metrics'  => $physical,
     'technique_metrics' => $technique,
 
@@ -146,7 +152,7 @@ return [
             'date'  => 'created_at',
             'fields' => [
                 'year'       => $num('Tahun', '1', 'required|integer|min:2000|max:2100'),
-                'month'      => $num('Bulan (1-12)', '1', 'required|integer|min:1|max:12'),
+                'month'      => ['label' => 'Bulan', 'type' => 'select', 'options' => 'months', 'rules' => 'required|integer|min:1|max:12'],
                 'score'      => $num('Skor', '1', 'nullable|integer|min:0|max:720'),
                 'score_note' => ['label' => 'Catatan skor (mis. 307+304)', 'type' => 'text', 'rules' => 'nullable|string|max:60'],
                 'venue'      => ['label' => 'Tempat', 'type' => 'text', 'rules' => 'nullable|string|max:150'],
