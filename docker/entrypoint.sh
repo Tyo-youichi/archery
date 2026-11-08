@@ -35,9 +35,18 @@ if [ ! -d vendor ]; then
         || composer update --prefer-dist --optimize-autoloader
 fi
 
-# 4) Kunci aplikasi
+# 4) Kunci aplikasi (APP_KEY).
+#    Agar TIDAK logout tiap rebuild/recreate, set APP_KEY lewat environment
+#    (file .env di samping docker-compose.yml). Nilai itu dipakai konsisten.
+#    Kalau belum di-set sama sekali, generate sekali — tapi key ini akan berubah
+#    pada container berikutnya, jadi SALIN ke .env host agar tetap sama.
+if [ -n "${APP_KEY:-}" ]; then
+    set_env APP_KEY "${APP_KEY}"
+fi
 if ! grep -q "^APP_KEY=base64:" .env; then
     php artisan key:generate --force
+    echo "[archer] PERINGATAN: APP_KEY digenerate otomatis. Salin nilainya ke file .env"
+    echo "[archer] di samping docker-compose.yml (APP_KEY=base64:...) agar tidak logout saat rebuild."
 fi
 
 # 5) Folder & izin tulis (storage & public/uploads di-mount sebagai volume → siapkan isinya)

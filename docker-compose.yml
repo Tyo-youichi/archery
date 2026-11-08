@@ -11,6 +11,10 @@ services:
       - "${APP_PORT:-7777}:80"
     environment:
       APP_ENV: "${APP_ENV:-local}"
+      # APP_KEY WAJIB diisi agar tidak logout tiap rebuild/recreate (cookie session
+      # dienkripsi dengan key ini). Set di file .env di samping docker-compose.yml.
+      # Dapatkan sekali: docker compose run --rm app php artisan key:generate --show
+      APP_KEY: "${APP_KEY:-}"
       APP_DEBUG: "${APP_DEBUG:-true}"
       APP_URL: "${APP_URL:-http://localhost:7777}"
       # DB eksternal. Default menunjuk ke MariaDB di host (host.docker.internal).
