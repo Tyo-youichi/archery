@@ -23,7 +23,8 @@ class AppServiceProvider extends ServiceProvider
         // Aman untuk MariaDB/MySQL lama di shared hosting (indeks utf8mb4).
         \Illuminate\Support\Facades\Schema::defaultStringLength(191);
 
-        // Semua pagination memakai markup Bootstrap 5 (UI aplikasi pakai Bootstrap 5).
-        Paginator::useBootstrapFive();
+        // Semua pagination memakai view kustom (Bootstrap 5) yang SELALU tampil,
+        // termasuk saat hanya satu halaman, agar tampilan tabel konsisten.
+        Paginator::defaultView('vendor.pagination.app');
     }
 }

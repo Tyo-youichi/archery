@@ -41,9 +41,7 @@
         @endforelse
         </tbody>
     </table></div>
-    @if($rows->hasPages())
-        <div class="mt-3">{{ $rows->links() }}</div>
-    @endif
+    <div class="mt-3">{{ $rows->links() }}</div>
 </div></div>
 @endif
 @endsection

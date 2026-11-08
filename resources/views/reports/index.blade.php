@@ -81,14 +81,7 @@
             @include('reports.' . ($partials[$type] ?? $type))
         </div>
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 no-print">
-            <div class="small text-muted">
-                Menampilkan {{ $athletes->firstItem() }}–{{ $athletes->lastItem() }} dari {{ $athletes->total() }} atlet
-            </div>
-            @if($athletes->hasPages())
-                <div>{{ $athletes->links('pagination::bootstrap-5') }}</div>
-            @endif
-        </div>
+        <div class="mt-3 no-print">{{ $athletes->links() }}</div>
     @endif
 </div></div>
 @endsection

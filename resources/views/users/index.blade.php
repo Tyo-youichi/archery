@@ -64,7 +64,5 @@
     </tbody>
 </table></div></div>
 
-@if($users->hasPages())
-    <div class="mt-3">{{ $users->links() }}</div>
-@endif
+<div class="mt-3">{{ $users->links() }}</div>
 @endsection
