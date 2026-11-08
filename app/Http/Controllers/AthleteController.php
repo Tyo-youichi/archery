@@ -38,7 +38,7 @@ class AthleteController extends Controller
         return redirect()->route('athletes.show', $athlete)->with('ok', 'Atlet ditambahkan.');
     }
 
-    public function show(Athlete $athlete)
+    public function show(Athlete $athlete, string $tab = 'ringkasan')
     {
         $this->authorizeView($athlete);
 
@@ -94,6 +94,7 @@ class AthleteController extends Controller
         ];
 
         return view('athletes.show', [
+            'tab' => $tab,
             'athlete' => $athlete->load('equipment'),
             'profile' => $profile,
             'scores' => $scores,

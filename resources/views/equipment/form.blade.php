@@ -7,7 +7,7 @@
         @foreach(config('archery.equipment_fields') as $k => $label)
             <div class="col-md-4"><label class="form-label small">{{ $label }}</label><input name="{{ $k }}" value="{{ old($k, $equipment->{$k} ?? '') }}" class="form-control"></div>
         @endforeach
-        <div class="col-12"><button class="btn btn-primary">Simpan</button> <a class="btn btn-link" href="{{ route('athletes.show', $athlete) }}">Batal</a></div>
+        <div class="col-12"><button class="btn btn-primary">Simpan</button> <a class="btn btn-link" href="{{ route('athletes.show', [$athlete, 'alat']) }}">Batal</a></div>
     </form>
 </div></div>
 @endsection

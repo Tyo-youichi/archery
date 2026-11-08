@@ -34,14 +34,14 @@
 <ul class="nav nav-tabs mb-3" role="tablist">
     @php $tabs = ['ringkasan' => 'Ringkasan', 'antro' => 'Antropometri', 'fisik' => 'Performa Fisik', 'teknik' => 'Performa Teknik', 'beban' => 'Beban', 'skor' => 'Skor Bulanan', 'alat' => 'Peralatan']; @endphp
     @foreach($tabs as $id => $label)
-        <li class="nav-item"><button class="nav-link @if($loop->first) active @endif" data-bs-toggle="tab" data-bs-target="#tab-{{ $id }}" type="button">{{ $label }}</button></li>
+        <li class="nav-item"><a class="nav-link @if($tab === $id) active @endif" href="{{ route('athletes.show', [$athlete, $id]) }}">{{ $label }}</a></li>
     @endforeach
 </ul>
 
 <div class="tab-content">
 
     {{-- ================= Ringkasan / Data Visual ================= --}}
-    <div class="tab-pane fade show active" id="tab-ringkasan">
+    <div class="tab-pane fade @if($tab === 'ringkasan') show active @endif" id="tab-ringkasan">
         <div class="row g-3">
             <div class="col-lg-5"><div class="card h-100"><div class="card-body">
                 <div class="card-title-sm mb-2">Biodata</div>
@@ -71,7 +71,7 @@
     </div>
 
     {{-- ================= Antropometri ================= --}}
-    <div class="tab-pane fade" id="tab-antro">
+    <div class="tab-pane fade @if($tab === 'antro') show active @endif" id="tab-antro">
         <div class="card"><div class="card-body">
             <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Antropometri &amp; Komposisi Tubuh</h2>{!! $add('anthropometry', '+ Pengukuran') !!}</div>
             <div class="table-responsive"><table class="table table-compact mb-0">
@@ -103,8 +103,8 @@
     </div>
 
     {{-- ================= Performa Fisik & Teknik ================= --}}
-    @foreach([['fisik', 'physical', 'Tes Performa Fisik', $phys, $physicalHistory], ['teknik', 'technique', 'Data Performa Teknik', $tech, $techniqueHistory]] as [$tab, $type, $title, $ev, $hist])
-    <div class="tab-pane fade" id="tab-{{ $tab }}">
+    @foreach([['fisik', 'physical', 'Tes Performa Fisik', $phys, $physicalHistory], ['teknik', 'technique', 'Data Performa Teknik', $tech, $techniqueHistory]] as [$tabId, $type, $title, $ev, $hist])
+    <div class="tab-pane fade @if($tab === $tabId) show active @endif" id="tab-{{ $tabId }}">
         <div class="card"><div class="card-body">
             <div class="d-flex justify-content-between mb-3"><h2 class="h5 mb-0">{{ $title }}
                 @if($ev['record'])<small class="text-muted fs-6">· tes terakhir {{ $ev['record']->tested_at->format('d/m/Y') }}</small>@endif</h2>{!! $add($type, '+ Hasil tes') !!}</div>
@@ -145,7 +145,7 @@
     @endforeach
 
     {{-- ================= Beban ================= --}}
-    <div class="tab-pane fade" id="tab-beban">
+    <div class="tab-pane fade @if($tab === 'beban') show active @endif" id="tab-beban">
         <div class="card"><div class="card-body">
             <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Data Beban (1RM terbaru per latihan)</h2>
                 <div class="d-flex gap-2">{!! $add('load', '+ Data beban') !!}<a class="btn btn-sm btn-outline-secondary" href="{{ route('beban.print', $athlete) }}" target="_blank">Cetak</a></div></div>
@@ -163,7 +163,7 @@
     </div>
 
     {{-- ================= Skor bulanan ================= --}}
-    <div class="tab-pane fade" id="tab-skor">
+    <div class="tab-pane fade @if($tab === 'skor') show active @endif" id="tab-skor">
         <div class="card"><div class="card-body">
             <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Catatan Skor Bulanan</h2>{!! $add('score', '+ Skor') !!}</div>
             @if(count($charts['scores']['data']) > 0)<canvas id="scores" height="80" class="mb-3"></canvas>@endif
@@ -180,7 +180,7 @@
     </div>
 
     {{-- ================= Peralatan ================= --}}
-    <div class="tab-pane fade" id="tab-alat">
+    <div class="tab-pane fade @if($tab === 'alat') show active @endif" id="tab-alat">
         <div class="card"><div class="card-body">
             <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Peralatan</h2>@if($staff || auth()->id() === $athlete->user_id)<a class="btn btn-sm btn-outline-primary" href="{{ route('equipment.edit', $athlete) }}">Edit peralatan</a>@endif</div>
             <div class="row g-2">

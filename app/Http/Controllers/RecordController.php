@@ -25,6 +25,25 @@ class RecordController extends Controller
 {
     private const METRIC_TYPES = ['physical', 'technique'];
 
+    /** Tiap jenis record tampil di tab mana pada halaman profil atlet (untuk kembali ke tab asal). */
+    private const TAB = [
+        'anthropometry' => 'antro',
+        'physical'      => 'fisik',
+        'technique'     => 'teknik',
+        'load'          => 'beban',
+        'score'         => 'skor',
+    ];
+
+    private function tab(string $type): string
+    {
+        return self::TAB[$type] ?? 'ringkasan';
+    }
+
+    private function backToProfile(Athlete $athlete, string $type)
+    {
+        return redirect()->route('athletes.show', [$athlete, $this->tab($type)]);
+    }
+
     /** Metrik multi-percobaan (key => jumlah percobaan). Hanya berlaku untuk tes fisik. */
     private function attempts(string $type): array
     {
@@ -167,7 +186,7 @@ class RecordController extends Controller
     {
         $def = $this->def($type);
 
-        return view('records.form', ['athlete' => $athlete, 'type' => $type, 'def' => $def, 'record' => null, 'values' => []]);
+        return view('records.form', ['athlete' => $athlete, 'type' => $type, 'def' => $def, 'record' => null, 'values' => [], 'tab' => $this->tab($type)]);
     }
 
     public function store(Request $request, Athlete $athlete, string $type)
@@ -177,7 +196,7 @@ class RecordController extends Controller
         $data = $this->toResults($type, $data, $athlete);
         $def['model']::create($data + ['athlete_id' => $athlete->id]);
 
-        return redirect()->route('athletes.show', $athlete)->with('ok', $def['label'] . ' tersimpan.');
+        return $this->backToProfile($athlete, $type)->with('ok', $def['label'] . ' tersimpan.');
     }
 
     public function edit(Athlete $athlete, string $type, int $id)
@@ -185,8 +204,9 @@ class RecordController extends Controller
         $def = $this->def($type);
         $record = $def['model']::where('athlete_id', $athlete->id)->findOrFail($id);
         $values = $this->metricValues($type, $record);
+        $tab = $this->tab($type);
 
-        return view('records.form', compact('athlete', 'type', 'def', 'record', 'values'));
+        return view('records.form', compact('athlete', 'type', 'def', 'record', 'values', 'tab'));
     }
 
     public function update(Request $request, Athlete $athlete, string $type, int $id)
@@ -197,7 +217,7 @@ class RecordController extends Controller
         $data = $this->toResults($type, $data, $athlete, $record->results ?? []);
         $record->update($data);
 
-        return redirect()->route('athletes.show', $athlete)->with('ok', $def['label'] . ' diperbarui.');
+        return $this->backToProfile($athlete, $type)->with('ok', $def['label'] . ' diperbarui.');
     }
 
     public function destroy(Athlete $athlete, string $type, int $id)
@@ -205,6 +225,6 @@ class RecordController extends Controller
         $def = $this->def($type);
         $def['model']::where('athlete_id', $athlete->id)->findOrFail($id)->delete();
 
-        return redirect()->route('athletes.show', $athlete)->with('ok', 'Data dihapus.');
+        return $this->backToProfile($athlete, $type)->with('ok', 'Data dihapus.');
     }
 }

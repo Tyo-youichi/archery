@@ -24,6 +24,6 @@ class EquipmentController extends Controller
         $rules = collect(config('archery.equipment_fields'))->map(fn () => 'nullable|string|max:150')->all();
         $athlete->equipment()->updateOrCreate([], $request->validate($rules));
 
-        return redirect()->route('athletes.show', $athlete)->with('ok', 'Peralatan tersimpan.');
+        return redirect()->route('athletes.show', [$athlete, 'alat'])->with('ok', 'Peralatan tersimpan.');
     }
 }

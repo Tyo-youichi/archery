@@ -44,7 +44,10 @@ Route::middleware(['auth', 'rbac', 'payment'])->group(function () {
     Route::put('/akun', [AccountController::class, 'update'])->name('account.update');
 
     // Profil & Buku Saku: atlet untuk dirinya sendiri, staf untuk semua (dicek di controller).
-    Route::get('/athletes/{athlete}', [AthleteController::class, 'show'])->name('athletes.show')->whereNumber('athlete');
+    // Tiap tab profil punya URL sendiri ({tab}) agar back/submit kembali ke tab yang sama.
+    // Dibatasi ke slug tab yang valid supaya tidak menelan /edit, /equipment, /shoot-log, dll.
+    Route::get('/athletes/{athlete}/{tab?}', [AthleteController::class, 'show'])->name('athletes.show')
+        ->whereNumber('athlete')->where('tab', 'ringkasan|antro|fisik|teknik|beban|skor|alat');
     Route::get('/athletes/{athlete}/shoot-log', [ShootLogController::class, 'edit'])->name('shoot-log.edit');
     Route::put('/athletes/{athlete}/shoot-log', [ShootLogController::class, 'update'])->name('shoot-log.update');
 

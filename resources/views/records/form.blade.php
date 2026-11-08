@@ -55,7 +55,7 @@
                 </div>
             @endif
         @endforeach
-        <div class="col-12"><button class="btn btn-primary">Simpan</button> <a class="btn btn-link" href="{{ route('athletes.show', $athlete) }}">Batal</a></div>
+        <div class="col-12"><button class="btn btn-primary">Simpan</button> <a class="btn btn-link" href="{{ route('athletes.show', [$athlete, $tab ?? 'ringkasan']) }}">Batal</a></div>
     </form>
 </div></div>
 @endsection
