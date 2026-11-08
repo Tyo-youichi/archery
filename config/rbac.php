@@ -54,6 +54,7 @@ return [
         'records.*'        => ['admin', 'coach'],
         'h2h.*'            => ['admin', 'coach'],
         'reports.*'        => ['admin', 'coach'],   // laporan rekap lintas-atlet
+        'guide.*'          => ['admin', 'coach'],   // panduan pengisian data atlet
 
         // Boleh semua user login (tanda '*'); kepemilikan data dicek di controller.
         'dashboard.*'      => ['*'],
@@ -77,6 +78,7 @@ return [
         ['label' => 'Atlet',        'route' => 'athletes.index', 'roles' => ['admin', 'coach']],
         ['label' => 'Head to Head', 'route' => 'h2h.index',      'roles' => ['admin', 'coach']],
         ['label' => 'Laporan',     'route' => 'reports.index',   'roles' => ['admin', 'coach']],
+        ['label' => 'Panduan',     'route' => 'guide.index',     'roles' => ['admin', 'coach']],
         ['label' => 'Metrik & BM', 'route' => 'metrics.index',    'roles' => ['admin']],
         ['label' => 'Pengguna',    'route' => 'users.index',      'roles' => ['admin']],
         ['label' => 'Pembayaran',  'route' => 'payment.index',    'roles' => ['admin']],

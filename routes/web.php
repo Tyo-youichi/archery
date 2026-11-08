@@ -86,6 +86,9 @@ Route::middleware(['auth', 'rbac', 'payment'])->group(function () {
     // Laporan rekap lintas-atlet (fisik/teknik/skor/peralatan/beban). Admin & coach.
     Route::get('/laporan/{type?}', [ReportController::class, 'index'])->name('reports.index');
 
+    // Panduan pengisian data atlet (halaman statis). Admin & coach.
+    Route::view('/panduan', 'guide.index')->name('guide.index');
+
     // Pengelolaan metrik/benchmark & pengguna. Akses murni dari tabel RBAC
     // ('metrics.*' / 'users.*' => admin) — tanpa hard-guard.
     Route::resource('metrics', MetricController::class)->except(['show']);
