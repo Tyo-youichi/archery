@@ -63,4 +63,8 @@
     @empty<tr><td colspan="6" class="text-muted p-3">Tidak ada pengguna yang cocok.</td></tr>@endforelse
     </tbody>
 </table></div></div>
+
+@if($users->hasPages())
+    <div class="mt-3">{{ $users->links() }}</div>
+@endif
 @endsection

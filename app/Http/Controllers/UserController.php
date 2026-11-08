@@ -36,7 +36,8 @@ class UserController extends Controller
             // Staf (non-atlet) lebih dulu, lalu atlet; masing-masing urut nama.
             ->orderByRaw("CASE WHEN role = ? THEN 1 ELSE 0 END", [$athleteRole])
             ->orderBy('name')
-            ->get();
+            ->paginate(25)
+            ->withQueryString();
 
         return view('users.index', [
             'users'       => $users,
